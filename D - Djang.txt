@@ -1,0 +1,409 @@
+سيناريو تطوير منصة "ضاد" التعليمية
+التقنيات المختارة:
+
+الواجهة الخلفية (Backend): Django (باستخدام Python)
+
+قاعدة البيانات (Database): PostgreSQL
+
+الواجهة الأمامية (Frontend): HTML, CSS (Tailwind CSS), JavaScript (Vanilla JS أو مكتبات خفيفة)
+
+المرحلة الأولى: الإعداد الأولي للمشروع
+1. إعداد بيئة التطوير
+تثبيت Python و pip:
+
+تأكد من تثبيت Python 3.x (يفضل أحدث إصدار LTS).
+
+pip هو مدير الحزم لـ Python ويأتي عادةً مع Python.
+
+تحقق من التثبيت: python --version و pip --version في سطر الأوامر.
+
+تثبيت PostgreSQL:
+
+قم بتثبيت PostgreSQL على جهازك المحلي. تأكد من ضبط اسم مستخدم وكلمة مرور لقاعدة البيانات.
+
+أو استخدم Docker إذا كنت مرتاحاً لذلك، لتشغيل PostgreSQL في حاوية معزولة.
+
+إنشاء بيئة افتراضية (Virtual Environment):
+
+هذه خطوة مهمة لعزل حزم مشروعك.
+
+في مجلد المشروع الرئيسي (مثلاً D:\projectNode\ضاد-منصة):
+
+python -m venv venv
+
+تفعيل البيئة الافتراضية:
+
+على Windows (Command Prompt): venv\Scripts\activate
+
+على Windows (PowerShell): .\venv\Scripts\Activate.ps1
+
+تثبيت Django:
+
+بعد تفعيل البيئة الافتراضية:
+
+pip install Django psycopg2-binary
+
+(psycopg2-binary هو محول PostgreSQL لـ Python).
+
+2. إعداد مشروع Django
+إنشاء مشروع Django جديد:
+
+بينما البيئة الافتراضية مفعلة:
+
+django-admin startproject DhadPlatform .
+
+(النقطة . تعني إنشاء المشروع في المجلد الحالي).
+
+تكوين قاعدة البيانات (settings.py):
+
+افتح ملف DhadPlatform/settings.py (داخل مجلد مشروعك) وقم بتعديل قسم DATABASES ليتناسب مع إعدادات PostgreSQL الخاصة بك:
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'dhad_db',       # اسم قاعدة البيانات التي أنشأتها
+        'USER': 'your_user',      # اسم المستخدم لقاعدة بيانات PostgreSQL
+        'PASSWORD': 'your_password', # كلمة المرور لقاعدة بيانات PostgreSQL
+        'HOST': 'localhost',      # أو IP خادم قاعدة البيانات
+        'PORT': '5432',           # منفذ PostgreSQL الافتراضي
+    }
+}
+
+أضف تطبيقات Django الأساسية:
+
+داخل INSTALLED_APPS في settings.py، ستحتاج إلى إضافة تطبيقاتك المخصصة. سنبدأ بإنشاء بعض التطبيقات.
+
+3. إنشاء تطبيقات Django (Apps)
+لتنظيم مشروعك، قم بإنشاء تطبيقات (Apps) منفصلة لكل جزء وظيفي.
+
+بينما البيئة الافتراضية مفعلة (في نفس مجلد manage.py):
+
+python manage.py startapp core
+python manage.py startapp registration
+python manage.py startapp academic
+python manage.py startapp messaging
+python manage.py startapp payments
+
+إضافتها إلى settings.py:
+
+في DhadPlatform/settings.py، أضف هذه التطبيقات إلى قائمة INSTALLED_APPS:
+
+INSTALLED_APPS = [
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+    # تطبيقاتك المخصصة:
+    'core',
+    'registration',
+    'academic',
+    'messaging',
+    'payments',
+    # لإعداد Tailwind CSS (سنأتي لذلك لاحقاً)
+    'tailwind',
+    'theme', # اسم التطبيق الذي سيحتوي ملفات Tailwind
+]
+
+4. تطبيق الترحيلات الأولية (Initial Migrations)
+قم بتطبيق الترحيلات الأولية لقاعدة البيانات لإنشاء الجداول الأساسية لـ Django (مثل جداول المستخدمين).
+
+python manage.py makemigrations
+python manage.py migrate
+
+5. إعداد Tailwind CSS
+تثبيت django-tailwind:
+
+pip install django-tailwind
+
+إضافة tailwind إلى INSTALLED_APPS (تمت في الخطوة 3).
+
+إنشاء تطبيق Tailwind (Theme App):
+
+python manage.py tailwind init
+
+(هذا سيقوم بإنشاء تطبيق theme جديد ويعدله ليحتوي على إعدادات Tailwind).
+
+تكوين settings.py لـ Tailwind:
+
+# DhadPlatform/settings.py
+TAILWIND_APP_NAME = 'theme'
+INTERNAL_IPS = [
+    "127.0.0.1",
+]
+
+بناء Tailwind CSS:
+
+في مجلد مشروعك، قم بتشغيل:
+
+python manage.py tailwind install
+python manage.py tailwind build
+
+هذه الأوامر ستقوم بتنزيل Tailwind CLI وبناء ملف CSS النهائي.
+
+المرحلة الثانية: تطوير الميزات الأساسية
+1. نظام المصادقة والصلاحيات (Authentication & Authorization)
+نماذج المستخدمين (Custom User Model):
+
+لتحمل أدوار Admin, Teacher, Student، يفضل استخدام نموذج مستخدم مخصص (Custom User Model) في Django.
+
+في core/models.py:
+
+from django.contrib.auth.models import AbstractUser
+from django.db import models
+
+class User(AbstractUser):
+    USER_ROLES = (
+        ('admin', 'Admin'),
+        ('teacher', 'Teacher'),
+        ('student', 'Student'),
+    )
+    role = models.CharField(max_length=10, choices=USER_ROLES, default='student')
+    # أضف أي حقول إضافية للمستخدمين هنا
+    phone_number = models.CharField(max_length=20, blank=True, null=True)
+    country = models.CharField(max_length=100, blank=True, null=True)
+    # ... إلخ حسب الحاجة
+
+    def __str__(self):
+        return self.username
+
+في DhadPlatform/settings.py، أضف:
+
+AUTH_USER_MODEL = 'core.User'
+
+نفذ الترحيلات بعد تعديل settings.py:
+
+python manage.py makemigrations core
+python manage.py migrate
+
+(إذا كان لديك بيانات في جدول المستخدمين الحالي، ستحتاج إلى ترحيل البيانات بحذر).
+
+لوحة الإدارة (Django Admin):
+
+يمكنك تسجيل نموذج User الخاص بك في core/admin.py للتحكم به من لوحة الإدارة.
+
+قم بإنشاء مستخدم مسؤول (Superuser): python manage.py createsuperuser
+
+صفحات تسجيل الدخول والخروج:
+
+استخدم views و forms المدمجة في Django (django.contrib.auth.views).
+
+قم بتصميم قوالب HTML مخصصة لهذه الصفحات باستخدام Tailwind.
+
+حماية المسارات (Decorators/Mixins):
+
+استخدم decorators مثل @login_required و @permission_required أو custom mixins لحماية views بناءً على دور المستخدم.
+
+2. واجهة الزائر ونموذج التسجيل
+نموذج RegistrationRequest (registration/models.py):
+
+قم بتعريف النموذج ليحتوي على جميع الحقول المطلوبة (الاسم الكامل، تاريخ الميلاد، الجنس، الدولة، إلخ).
+
+أضف حقل status (مثلاً: pending, approved, rejected) وحقل created_at.
+
+نموذج RegistrationForm (registration/forms.py):
+
+أنشئ ModelForm بناءً على نموذج RegistrationRequest.
+
+View لنموذج التسجيل (registration/views.py):
+
+دالة view لتعالج عرض النموذج وحفظ البيانات عند الإرسال.
+
+POST طلب يحفظ البيانات في قاعدة البيانات.
+
+إرسال الإشعارات: استخدم django.core.mail.send_mail لإرسال بريد إلكتروني للإدارة عند وجود طلب جديد.
+
+القالب (HTML Template):
+
+templates/registration/register.html: صمم نموذج HTML باستخدام Tailwind CSS.
+
+3. لوحة الإدارة (Admin Dashboard)
+جدول طلبات التسجيل (في Django Admin):
+
+سجل RegistrationRequest في registration/admin.py.
+
+قم بتخصيص عرض النموذج في لوحة الإدارة لإظهار جميع الحقول بشكل جيد.
+
+الإجراءات المخصصة (Custom Admin Actions):
+
+يمكنك إضافة "إجراء" (Action) مخصص في لوحة الإدارة يسمح للمسؤول باختيار طلبات تسجيل متعددة ثم النقر على "إنشاء طالب من الطلبات المختارة".
+
+هذا الإجراء سيقوم بإنشاء حساب User جديد في نموذج core.User، توليد كلمة مرور عشوائية، وتعيين الدور الافتراضي (مثلاً "student").
+
+بعد الإنشاء، يمكن إرسال بريد إلكتروني تلقائي للطالب بمعلومات تسجيل الدخول.
+
+إدارة الطلاب والمواد (في Django Admin):
+
+لوحة إدارة Django ستكون الواجهة الرئيسية للمسؤولين لإضافة/تعديل:
+
+الطلاب (Users).
+
+البرامج، المواد، الحلقات الدراسية (نماذجك في academic/models.py).
+
+تحديث حالة الدفع (يمكن إضافة حقل payment_status إلى نموذج الطالب أو نموذج اشتراك منفصل).
+
+إضافة/تعديل الدروس المسجلة (بما في ذلك روابط YouTube).
+
+رفع الملفات التعليمية (Django FileField أو التكامل مع S3 لـ django-storages).
+
+إدارة الواجبات والاختبارات.
+
+4. إدارة الاشتراكات والدفع
+نموذج Subscription (payments/models.py):
+
+student = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+
+program = models.ForeignKey(Program, on_delete=models.CASCADE)
+
+status = models.CharField(max_length=20, choices=...) (مثل pending, paid, cancelled)
+
+payment_notes = models.TextField(blank=True, null=True) (لإدارة الملاحظات اليدوية).
+
+start_date, end_date.
+
+لوحة الإدارة:
+
+سجل نموذج Subscription في payments/admin.py.
+
+سيتمكن المسؤول من تتبع كل اشتراك وتحديث حالته يدوياً بعد التواصل مع الطالب وتأكيد الدفع.
+
+5. إدارة المحتوى الأكاديمي
+نماذج في academic/models.py:
+
+Program: اسم البرنامج، وصف.
+
+Course: اسم المادة، وصف، ربط بـ Program.
+
+Class (الحلقة): ربط بـ Course، Teacher (من User), start_time, end_time, students (Many-to-Many field مع User).
+
+Lesson: ربط بـ Course، title, description, youtube_link (CharField), is_recorded.
+
+EducationalFile: ربط بـ Course, title, file (FileField), uploaded_by.
+
+Assignment: ربط بـ Course, title, description, due_date, max_score.
+
+Submission: ربط بـ Assignment, student (User), file (FileField), submitted_at, status (pending, graded), score, teacher_notes.
+
+Test: ربط بـ Course, title, ``description, due_date`, `is_placement_test` (BooleanField).
+
+Question: ربط بـ Test, text, type (multiple choice, true/false), correct_answer_text.
+
+Option: ربط بـ Question, text, is_correct.
+
+TestResult: ربط بـ Test, student (User), score, status (solved, not solved).
+
+لوحة الإدارة:
+
+سجل كل هذه النماذج في academic/admin.py لإدارتها بسهولة.
+
+بالنسبة لـ youtube_link، سيقوم المسؤول فقط بلصق الرابط.
+
+بالنسبة لرفع الملفات، Django FileField سيتعامل معها.
+
+6. واجهة الطالب
+صفحات HTML مع Tailwind CSS و JavaScript:
+
+صفحة تسجيل الدخول (login.html): نموذج تسجيل الدخول.
+
+اختبار تحديد المستوى (placement_test.html):
+
+Django view: تستقبل الطلبات، تتحقق من حالة الطالب (لأول مرة تسجيل دخول)، تجلب الأسئلة من قاعدة البيانات بناءً على المرحلة الحالية.
+
+JavaScript: يعرض الأسئلة ديناميكياً في الواجهة، يرسل إجابات الطالب إلى Django view عبر AJAX (fetch API).
+
+Django view: يعالج الإجابات، يحسب الدرجة، يحدد المرحلة التالية أو مستوى الطالب النهائي، ويقوم بتسجيله في حلقة إذا كان هناك مقعد.
+
+إعادة توجيه الطالب إلى لوحة التحكم أو رسالة "قيد الانتظار".
+
+لوحة التحكم الرئيسية (dashboard.html):
+
+Django view: تجلب بيانات الطالب (اسمه، صفه، برامجه، مواد، جلسات قادمة).
+
+HTML/Tailwind: لعرض المعلومات.
+
+JavaScript: يمكن استخدام مكتبة JS خفيفة للتقويم (Calendar) أو بناء تقويم بسيط يدويًا يعرض بيانات الجلسات.
+
+زر "انضمام مباشر": رابط يتم تفعيله بواسطة JavaScript بناءً على الوقت الحالي والجلسات المجدولة.
+
+صفحة المادة الدراسية (course_detail.html):
+
+Django view: تجلب تفاصيل المادة، الدروس، الملفات، الواجبات، الاختبارات.
+
+تشغيل الفيديو:
+
+زر "تشغيل الدرس". عند النقر، يقوم JavaScript بإرسال طلب AJAX إلى Django view (مثلاً /api/lessons/<lesson_id>/video/).
+
+Django view: يتحقق من أن الطالب مشترك في هذه المادة. إذا كان كذلك، يعيد رابط YouTube الخاص بالفيديو. إذا لم يكن، يعيد رسالة خطأ.
+
+JavaScript: إذا استقبل الرابط، يقوم بإنشاء <iframe> (مشغل YouTube) وعرضه. إذا استقبل رسالة خطأ، يعرض الرسالة "للوصول إلى هذا الدرس، يرجى التواصل مع الإدارة...".
+
+الملفات التعليمية: روابط مباشرة للملفات أو views خاصة بالتنزيل بعد التحقق من الصلاحية.
+
+الواجبات/الاختبارات: نماذج HTML لرفع الواجبات أو حل الاختبارات، مع إرسال البيانات عبر AJAX.
+
+صفحة الملف الشخصي (profile.html): عرض وتعديل البيانات، رفع صورة شخصية.
+
+7. نظام الرسائل والمجتمع (Messaging System)
+هذا الجزء هو الأكثر تحديًا بدون WebSockets، ولكن يمكن تحقيق وظائف أساسية:
+
+نماذج Conversation و Message (messaging/models.py):
+
+Conversation: لتحديد الأطراف في المحادثة (طالب-معلم، طالب-طالب).
+
+Message: نص الرسالة، المرسل، المستقبل/المحادثة، الوقت.
+
+Views (messaging/views.py):
+
+نقطة نهاية (GET /api/messages/<conversation_id>/) لجلب الرسائل في محادثة معينة.
+
+نقطة نهاية (POST /api/messages/send/) لإرسال رسالة وحفظها في قاعدة البيانات.
+
+Frontend (HTML/JS):
+
+قائمة المحادثات: عرض قائمة بالمحادثات النشطة للطالب.
+
+واجهة الدردشة:
+
+JavaScript يقوم بتحميل الرسائل الحالية عند فتح المحادثة.
+
+التحديث (Polling): لتقليد "الوقت الفعلي"، يمكن لـ JavaScript أن يقوم بـ "polling" (إرسال طلب AJAX كل بضع ثوانٍ) إلى نقطة نهاية GET /api/messages/ للتحقق من وجود رسائل جديدة وعرضها.
+
+نموذج لإرسال رسالة (عبر AJAX POST).
+
+ملاحظة: هذا النهج لن يكون "وقت حقيقي" حقيقياً مثل WhatsApp، لكنه سيوفر تجربة تحديث شبه فورية. إذا كانت الميزانية تسمح لاحقاً، يمكن استكشاف Django Channels لإضافة WebSockets.
+
+المرحلة الثالثة: النشر والصيانة
+1. النشر (Deployment)
+الخادم الافتراضي الخاص (VPS): استئجر VPS من مزود مثل DigitalOcean, AWS EC2, Linode.
+
+Web Server (Nginx): لتوجيه الطلبات، وخدمة الملفات الثابتة (static files) وملفات الوسائط (media files).
+
+WSGI Server (Gunicorn/uWSGI): لتشغيل تطبيق Django Python الخاص بك.
+
+PostgreSQL: تثبيتها على نفس الخادم أو استخدام خدمة قاعدة بيانات مُدارة.
+
+خدمة الملفات السحابية (اختياري، لكن موصى به): استخدم AWS S3 لتخزين ملفات المستخدمين (مثل الواجبات المرفوعة والملفات التعليمية) باستخدام django-storages بدلاً من تخزينها على الخادم مباشرة. هذا يحسن الأداء وقابلية التوسع ويسهل النسخ الاحتياطي.
+
+اسم النطاق (Domain Name) وشهادة SSL (HTTPS): ضروريان للأمان.
+
+2. الأدوات والمكتبات الموصى بها في Django
+psycopg2-binary: محول PostgreSQL.
+
+django-crispy-forms (اختياري): لتسهيل عرض نماذج Django بشكل جميل.
+
+django-tailwind: لإدارة Tailwind CSS بسهولة أكبر.
+
+Pillow: لمعالجة الصور (إذا كنت تخطط لرفع صور المستخدمين أو صور مصغرة للدروس).
+
+django-storages: إذا كنت ستستخدم خدمات تخزين سحابية مثل AWS S3.
+
+python-decouple أو dotenv: لإدارة متغيرات البيئة بشكل آمن.
+
+هذا السيناريو يمنحك خريطة طريق واضحة. بما أن الإنترنت ضعيف، سنركز على كل خطوة بعناية، وسنبدأ بالأمور الأساسية أولاً.
+
+الخطوة التالية (إذا كنت مستعداً):
+
+سنقوم الآن بإنشاء قاعدة بيانات PostgreSQL على جهازك وتكوين مشروع Django للاتصال بها، ثم تطبيق الترحيلات الأولية.
+
+هل أنت جاهز للبدء في إعداد قاعدة البيانات وربطها بـ Django؟

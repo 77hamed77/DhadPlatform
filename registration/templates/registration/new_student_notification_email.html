@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إشعار: تسجيل طالب جديد في منصة ضاد</title>
+    <style>
+        /* أنماط أساسية لضمان التوافقية */
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            color: #333333;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            direction: rtl; /* لضمان اتجاه النص من اليمين لليسار في كل مكان */
+            text-align: right; /* محاذاة النص الافتراضية لليمين */
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        td, th {
+            padding: 10px;
+            vertical-align: top;
+        }
+        a {
+            color: #1a73e8; /* لون أزرق للروابط */
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden; /* لمنع المحتوى من تجاوز الحدود */
+        }
+        .header {
+            background-color: #007bff; /* أزرق أساسي لضاد */
+            color: #ffffff;
+            padding: 20px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .body-content {
+            padding: 20px 30px;
+        }
+        .details-table {
+            width: 100%;
+            border: 1px solid #dddddd;
+            border-radius: 5px;
+            margin-top: 15px;
+            margin-bottom: 20px;
+        }
+        .details-table td {
+            border-bottom: 1px solid #eeeeee;
+        }
+        .details-table tr:last-child td {
+            border-bottom: none;
+        }
+        .details-table td strong {
+            color: #555555;
+            display: block; /* لجعل العنوان يأخذ سطرًا كاملاً */
+            margin-bottom: 5px;
+        }
+        .button {
+            display: inline-block;
+            background-color: #28a745; /* أخضر لزر الإجراء */
+            color: #ffffff !important; /* مهم لعملاء البريد الإلكتروني */
+            padding: 12px 25px;
+            border-radius: 5px;
+            text-decoration: none !important; /* مهم لعملاء البريد الإلكتروني */
+            font-weight: bold;
+            margin-top: 25px;
+            margin-bottom: 25px;
+        }
+        .footer {
+            background-color: #e9ecef; /* رمادي فاتح للذيل */
+            color: #6c757d;
+            padding: 15px;
+            font-size: 12px;
+            text-align: center;
+            border-top: 1px solid #dee2e6;
+        }
+        .logo {
+            max-width: 120px; /* حجم معقول للشعار */
+            height: auto;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body dir="rtl">
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+        <tr>
+            <td style="padding: 20px 0;">
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" align="center" class="container">
+                    <tr>
+                        <td class="header">
+                            <img src="https://via.placeholder.com/120x40/007bff/FFFFFF?text=DhadPlatform" alt="شعار منصة ضاد" class="logo" style="display: block; margin: 0 auto 10px auto;">
+                            <h1>إشعار تسجيل طالب جديد</h1>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="body-content">
+                            <p style="font-size: 16px; margin-bottom: 20px; color: #0056b3;">
+                                <strong>مرحباً بالإدارة الكرام،</strong>
+                            </p>
+                            <p style="margin-bottom: 15px;">
+                                تم تسجيل طالب جديد على <strong style="color: #007bff;">منصة ضاد التعليمية</strong> بتفاصيل التسجيل التالية:
+                            </p>
+
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" class="details-table">
+                                <tr>
+                                    <td style="padding: 10px; border-bottom: 1px solid #eeeeee;"><strong style="color: #555555;">اسم المستخدم:</strong></td>
+                                    <td style="padding: 10px; border-bottom: 1px solid #eeeeee;">{{ username }}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 10px; border-bottom: 1px solid #eeeeee;"><strong style="color: #555555;">البريد الإلكتروني:</strong></td>
+                                    <td style="padding: 10px; border-bottom: 1px solid #eeeeee;"><a href="mailto:{{ email }}" style="color: #1a73e8;">{{ email }}</a></td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 10px; border-bottom: 1px solid #eeeeee;"><strong style="color: #555555;">رقم الهاتف:</strong></td>
+                                    <td style="padding: 10px; border-bottom: 1px solid #eeeeee;">{{ phone_number }}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 10px; border-bottom: 1px solid #eeeeee;"><strong style="color: #555555;">الدولة:</strong></td>
+                                    <td style="padding: 10px; border-bottom: 1px solid #eeeeee;">{{ country }}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 10px;"><strong style="color: #555555;">تاريخ التسجيل:</strong></td>
+                                    <td style="padding: 10px;">{{ registration_date }}</td>
+                                </tr>
+                            </table>
+
+                            <p style="margin-bottom: 20px;">
+                                يرجى مراجعة تفاصيل الطالب وتحديد مستواه وتفعيله.
+                            </p>
+                            <p style="text-align: center;">
+                                <a href="{{ admin_link }}" class="button" target="_blank" style="background-color: #28a745; color: #ffffff !important; padding: 12px 25px; border-radius: 5px; text-decoration: none !important; font-weight: bold;">
+                                    الانتقال إلى لوحة الإدارة لمراجعة الطالب
+                                </a>
+                            </p>
+                            <p style="margin-top: 30px;">
+                                مع تحيات،<br>فريق منصة ضاد التعليمية
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="footer">
+                            <p>&copy; {{ "now"|date:"Y" }} منصة ضاد التعليمية. جميع الحقوق محفوظة.</p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

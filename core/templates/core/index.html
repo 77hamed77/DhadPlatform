@@ -1,0 +1,181 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}الرئيسية - منصة ضاد: بوابتك لتعلم العربية{% endblock %}
+
+{% block content %}
+
+{# 1. Hero Section - القسم العلوي البارز #}
+<section class="relative bg-gradient-to-l from-blue-800 to-green-700 text-white py-20 md:py-32 overflow-hidden">
+    {# نمط عربي في الخلفية (يتطلب static/images/arabic_pattern.png) #}
+    <div class="absolute inset-0 opacity-15" style="background-image: url({% static 'images/arabic_pattern.png' %}); background-size: cover; background-repeat: no-repeat; background-position: center;"></div>
+
+    <div class="container mx-auto px-4 text-center relative z-10">
+        <h1 class="text-4xl md:text-6xl font-extrabold mb-6 leading-tight animate-fade-in-down">
+            أتقن اللغة <span class="text-yellow-300">العربية</span> مع منصة <span class="text-white-A700">ضاد</span> التعليمية
+        </h1>
+        <p class="text-xl md:text-2xl mb-10 max-w-4xl mx-auto leading-relaxed animate-fade-in-up">
+            منهاج متكامل، دروس تفاعلية، ومعلمون خبراء لمساعدتك على إتقان لغة القرآن والضاد بفعالية ومرونة.
+        </p>
+        <div class="space-x-4 flex justify-center flex-wrap-reverse gap-4 animate-zoom-in"> {# Reverse for RTL, gap for spacing #}
+            <a href="{% url 'core:about_platform' %}" class="inline-block bg-white text-blue-700 hover:bg-gray-100 font-bold py-3 px-8 rounded-full text-lg md:text-xl shadow-lg transform hover:scale-105 transition duration-300 ease-in-out">
+                <i class="fas fa-info-circle ml-2"></i> اعرف المزيد عنا
+            </a>
+            <a href="{% url 'register_request' %}" class="inline-block bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-8 rounded-full text-lg md:text-xl shadow-lg transform hover:scale-105 transition duration-300 ease-in-out">
+                سجل الآن مجاناً! <i class="fas fa-arrow-left mr-2"></i>
+            </a>
+        </div>
+    </div>
+</section>
+
+{# 2. Features Section - لماذا تختار ضاد؟ (يمكن إعادة استخدام بطاقات من صفحة about) #}
+<section class="py-16 md:py-24 bg-gray-50">
+    <div class="container mx-auto px-4 text-center">
+        <h2 class="text-3xl md:text-4xl font-bold text-blue-800 mb-12">
+            لماذا يختار الطلاب <span class="text-green-600">منصة ضاد</span>؟
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 text-right">
+
+            {# بطاقة الميزة 1 #}
+            <div class="bg-white p-8 rounded-lg shadow-md hover:shadow-xl transform hover:-translate-y-2 transition duration-300 ease-in-out">
+                <div class="text-green-500 text-5xl mb-4">
+                    <i class="fas fa-chalkboard-teacher"></i>
+                </div>
+                <h3 class="text-2xl font-semibold text-blue-700 mb-3">معلمون خبراء ومؤهلون</h3>
+                <p class="text-gray-700 leading-relaxed">
+                    استفد من خبرة نخبة من المعلمين المتخصصين في تعليم اللغة العربية، بأساليب مبتكرة.
+                </p>
+            </div>
+
+            {# بطاقة الميزة 2 #}
+            <div class="bg-white p-8 rounded-lg shadow-md hover:shadow-xl transform hover:-translate-y-2 transition duration-300 ease-in-out">
+                <div class="text-green-500 text-5xl mb-4">
+                    <i class="fas fa-book-open"></i>
+                </div>
+                <h3 class="text-2xl font-semibold text-blue-700 mb-3">مناهج متكاملة ومصممة</h3>
+                <p class="text-gray-700 leading-relaxed">
+                    مناهجنا تغطي جميع المستويات، من المبتدئ إلى المتقدم، مع التركيز على المهارات الأساسية.
+                </p>
+            </div>
+
+            {# بطاقة الميزة 3 #}
+            <div class="bg-white p-8 rounded-lg shadow-md hover:shadow-xl transform hover:-translate-y-2 transition duration-300 ease-in-out">
+                <div class="text-green-500 text-5xl mb-4">
+                    <i class="fas fa-calendar-alt"></i>
+                </div>
+                <h3 class="text-2xl font-semibold text-blue-700 mb-3">مرونة في التعلم تناسبك</h3>
+                <p class="text-gray-700 leading-relaxed">
+                    اختر بين الدروس المباشرة التفاعلية، أو استفد من مكتبة ضخمة من الدروس المسجلة.
+                </p>
+            </div>
+            
+            {# يمكن إضافة بطاقات إضافية هنا (مثل: تتبع التقدم، بيئة مجتمعية، دعم فني) #}
+
+        </div>
+        <div class="mt-12">
+            <a href="{% url 'core:about_platform' %}" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-full text-lg shadow-lg transform hover:scale-105 transition duration-300 ease-in-out">
+                اكتشف المزيد عن ميزاتنا <i class="fas fa-arrow-left mr-2"></i>
+            </a>
+        </div>
+    </div>
+</section>
+
+{# 3. How It Works Section - كيف تعمل منصة ضاد؟ #}
+<section class="py-16 md:py-24 bg-white">
+    <div class="container mx-auto px-4 text-center">
+        <h2 class="text-3xl md:text-4xl font-bold text-blue-800 mb-12">
+            خطوات بسيطة لتبدأ رحلتك التعليمية
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-10"> {# زيادة الفجوة بين الخطوات #}
+            {# الخطوة 1 #}
+            <div class="flex flex-col items-center text-center p-6 rounded-lg shadow-md border-t-4 border-green-500">
+                <div class="bg-green-100 text-green-700 rounded-full w-20 h-20 flex items-center justify-center text-4xl font-bold mb-6 border-4 border-green-300">
+                    <i class="fas fa-user-plus"></i> {# أيقونة تسجيل #}
+                </div>
+                <h3 class="text-xl font-bold text-blue-700 mb-3">1. سجل مجانًا</h3>
+                <p class="text-gray-700">أنشئ حسابك المجاني في ثوانٍ. العملية سهلة وسريعة.</p>
+            </div>
+
+            {# الخطوة 2 #}
+            <div class="flex flex-col items-center text-center p-6 rounded-lg shadow-md border-t-4 border-yellow-500">
+                <div class="bg-yellow-100 text-yellow-700 rounded-full w-20 h-20 flex items-center justify-center text-4xl font-bold mb-6 border-4 border-yellow-300">
+                    <i class="fas fa-clipboard-list"></i> {# أيقونة اختبار #}
+                </div>
+                <h3 class="text-xl font-bold text-blue-700 mb-3">2. اختبر مستواك</h3>
+                <p class="text-gray-700">حدد مستواك في اللغة العربية عبر اختبار سريع ومجاني.</p>
+            </div>
+
+            {# الخطوة 3 #}
+            <div class="flex flex-col items-center text-center p-6 rounded-lg shadow-md border-t-4 border-purple-500">
+                <div class="bg-purple-100 text-purple-700 rounded-full w-20 h-20 flex items-center justify-center text-4xl font-bold mb-6 border-4 border-purple-300">
+                    <i class="fas fa-chalkboard"></i> {# أيقونة تعليم #}
+                </div>
+                <h3 class="text-xl font-bold text-blue-700 mb-3">3. ابدأ التعلم!</h3>
+                <p class="text-gray-700">انضم إلى دروسك المباشرة أو ابدأ التعلم من المكتبة المسجلة.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+{# 4. Testimonials Section - آراء طلابنا (لإثبات الثقة) #}
+<section class="py-16 md:py-24 bg-blue-50">
+    <div class="container mx-auto px-4 text-center">
+        <h2 class="text-3xl md:text-4xl font-bold text-blue-800 mb-12">
+            ماذا يقول طلابنا عن <span class="text-green-600">منصة ضاد</span>؟
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {# شهادة 1 #}
+            <div class="bg-white p-6 rounded-lg shadow-md flex flex-col items-center">
+                <img src="{% static 'images/avatar_female.png' %}" alt="صورة طالبة" class="w-20 h-20 rounded-full object-cover mb-4 border-4 border-green-400">
+                <p class="text-gray-700 text-lg mb-4 italic">
+                    "منصة ضاد غيرت طريقة تعلمي للغة العربية. الدروس ممتعة والمعلمون رائعون!"
+                </p>
+                <p class="font-bold text-blue-700">- سارة، طالبة من مصر</p>
+                <div class="text-yellow-400 mt-2">
+                    <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                </div>
+            </div>
+
+            {# شهادة 2 #}
+            <div class="bg-white p-6 rounded-lg shadow-md flex flex-col items-center">
+                <img src="{% static 'images/avatar_male.png' %}" alt="صورة طالب" class="w-20 h-20 rounded-full object-cover mb-4 border-4 border-blue-400">
+                <p class="text-gray-700 text-lg mb-4 italic">
+                    "مرونة الجدول الدراسي ومحتوى المناهج المتميز جعلاني أحرز تقدمًا كبيرًا في وقت قصير."
+                </p>
+                <p class="font-bold text-blue-700">- أحمد، طالب من السعودية</p>
+                <div class="text-yellow-400 mt-2">
+                    <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i>
+                </div>
+            </div>
+
+            {# شهادة 3 #}
+            <div class="bg-white p-6 rounded-lg shadow-md flex flex-col items-center">
+                <img src="{% static 'images/avatar_female_2.png' %}" alt="صورة طالبة" class="w-20 h-20 rounded-full object-cover mb-4 border-4 border-green-400">
+                <p class="text-gray-700 text-lg mb-4 italic">
+                    "أنصح بشدة منصة ضاد لكل من يرغب في تعلم العربية الفصحى بطريقة ممتعة وفعالة."
+                </p>
+                <p class="font-bold text-blue-700">- فاطمة، طالبة من المغرب</p>
+                <div class="text-yellow-400 mt-2">
+                    <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{# 5. Final Call to Action - دعوة أخيرة للعمل #}
+<section class="py-16 md:py-24 bg-green-600 text-white text-center">
+    <div class="container mx-auto px-4">
+        <h2 class="text-3xl md:text-4xl font-bold mb-6">
+            لا تفوت الفرصة! ابدأ رحلتك نحو إتقان العربية اليوم!
+        </h2>
+        <p class="text-xl md:text-2xl mb-8 max-w-2xl mx-auto">
+            انضم إلى آلاف الطلاب الذين بدؤوا رحلتهم مع منصة ضاد.
+        </p>
+        <a href="{% url 'register_request' %}" class="inline-block bg-yellow-400 hover:bg-yellow-500 text-blue-800 font-bold py-4 px-10 rounded-full text-xl md:text-2xl shadow-lg transform hover:scale-105 transition duration-300 ease-in-out animate-pulse">
+            سجل الآن مجاناً! <i class="fas fa-arrow-left mr-2"></i>
+        </a>
+    </div>
+</section>
+
+{% endblock %}

@@ -1,0 +1,344 @@
+{% load static %} {# حمل وسم static لتحميل الملفات الثابتة #}
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}منصة ضاد التعليمية{% endblock %}</title>
+    {# الأيقونة المفضلة للموقع #}
+    {# تم تحديث المسار من .ico إلى .png بناءً على هيكل مجلدك #}
+    <link rel="icon" type="image/png" href="{% static 'images/dhad_favicon.ico' %}"> 
+    
+    {# تضمين خطوط Google Fonts: Cairo و Almarai و Karla #}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Almarai:wght@300;400;700;800&family=Cairo:wght@200..1000&family=Karla:ital,wght@0,200..800;1,200..800&display=swap" rel="stylesheet">
+    {# نهاية تضمين خطوط Google Fonts #}
+
+    {# تحميل Tailwind CSS من CDN #}
+    <script src="https://cdn.tailwindcss.com"></script>
+    {# تحميل Font Awesome لأيقونات احترافية #}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    
+    {# كتلية للأنماط الإضافية الخاصة بكل صفحة #}
+    {% block extra_head %}{% endblock %}
+
+    <style>
+        /* تطبيق خط Cairo على كامل المستند */
+        html {
+            font-family: 'Cairo', sans-serif;
+        }
+        /* لا حاجة لتعريف font-family هنا مرة أخرى لـ body إذا كانت معرفة في html */
+        
+        /* تعريف الرسوم المتحركة الأساسية */
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        /* كلاسات لتطبيق الرسوم المتحركة */
+        .animate-fade-in-down { animation: fadeInDown 0.7s ease-out forwards; }
+        .animate-fade-in { animation: fadeIn 0.8s ease-out forwards; }
+
+        /* تخصيص شريط التمرير (Scrollbar) */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        /* لضمان عمل "text-right" بشكل افتراضي على مستوى الجسم */
+        body {
+            direction: rtl;
+            text-align: right;
+        }
+
+        /* كلاسات مساعدة لـ Tailwind لسهولة التطبيق */
+        .nav-link {
+            @apply text-gray-600 hover:text-blue-700 transition duration-300 font-medium relative py-2;
+        }
+        .nav-link-active {
+            @apply text-blue-700 font-semibold;
+        }
+        .nav-link-active::after {
+            content: '';
+            @apply absolute bottom-0 right-0 w-full h-0.5 bg-blue-600 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300;
+            transform-origin: right; /* لتأثير الخط من اليمين لليسار */
+        }
+        .nav-link-active:hover::after {
+            @apply scale-x-100;
+        }
+
+        .btn-primary {
+            @apply bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 transition duration-300 shadow-md;
+        }
+        .btn-secondary {
+            @apply bg-green-500 text-white px-5 py-2 rounded-lg hover:bg-green-600 transition duration-300 shadow-md;
+        }
+
+        /* أنماط قائمة الجوال */
+        .mobile-nav-link {
+            @apply text-white text-2xl hover:text-blue-300 transition duration-300 block py-3;
+        }
+        .mobile-nav-link-blue {
+            @apply bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition duration-300 text-2xl w-full max-w-xs mx-auto;
+        }
+        .mobile-nav-link-green {
+            @apply bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-600 transition duration-300 text-2xl w-full max-w-xs mx-auto;
+        }
+        .mobile-nav-link-red {
+            @apply bg-red-500 text-white px-6 py-3 rounded-lg hover:bg-red-600 transition duration-300 text-2xl w-full max-w-xs mx-auto;
+        }
+    </style>
+</head>
+<body class="font-sans antialiased bg-gray-100" style="font-family: 'Cairo', sans-serif;">
+    <div class="min-h-screen flex flex-col">
+
+        {# رأس الصفحة (شريط التنقل) #}
+        <header class="bg-white shadow-lg p-4 sticky top-0 z-50"> {# شريط علوي ثابت ومرتفع #}
+            <nav class="container mx-auto flex justify-between items-center">
+                {# شعار المنصة #}
+                <a href="{% url 'core:index' %}" class="flex items-center text-2xl font-bold text-blue-700 hover:text-blue-800 transition duration-300">
+                    {# تم تحديث مسار الشعار من dhad_favicon.ico إلى logo.png بناءً على هيكل مجلدك #}
+                    <img src="{% static 'images/dhad_favicon.ico' %}" alt="شعار منصة ضاد" class="h-10 w-auto ml-3"> 
+                    منصة ضاد
+                </a>
+
+                {# روابط التنقل الرئيسية (لشاشات العرض الكبيرة) #}
+                <div class="hidden md:flex space-x-6 space-x-reverse items-center"> {# إخفاء في الجوال، إظهار في الأجهزة اللوحية وما فوق #}
+                    <a href="{% url 'core:index' %}" class="nav-link {% if request.resolver_match.url_name == 'index' %}nav-link-active{% endif %}">الرئيسية</a>
+                    <a href="{% url 'core:about_platform' %}" class="nav-link {% if request.resolver_match.url_name == 'about_platform' %}nav-link-active{% endif %}">عن المنصة</a>
+                    <a href="{% url 'contacts:contact' %}" class="nav-link {% if request.resolver_match.view_name == 'contacts:contact' %}nav-link-active{% endif %}">تواصل معنا</a>
+
+                    {% if user.is_authenticated %}
+                        {# روابط المستخدم المسجل دخول #}
+                        <a href="{% url 'core:dashboard' %}" class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}nav-link-active{% endif %}">لوحة التحكم</a>
+                        <a href="{% url 'inbox' %}" class="nav-link {% if request.resolver_match.url_name == 'inbox' %}nav-link-active{% endif %}">الرسائل</a>
+                        <a href="{% url 'test_list' %}" class="nav-link {% if request.resolver_match.url_name == 'test_list' %}nav-link-active{% endif %}">الاختبارات</a>
+                        
+                        {# قائمة منسدلة للملف الشخصي (للمستخدمين المسجلين دخول) #}
+                        <div class="relative group">
+                            <button class="nav-link flex items-center focus:outline-none">
+                                {% if user.profile_picture %}
+                                    <img src="{{ user.profile_picture.url }}" alt="صورة الملف الشخصي" class="w-9 h-9 rounded-full object-cover border-2 border-blue-400 ml-2">
+                                {% else %}
+                                    <img src="{% static 'images/default_profile.png' %}" alt="صورة افتراضية" class="w-9 h-9 rounded-full object-cover border-2 border-blue-400 ml-2">
+                                {% endif %}
+                                <span class="hidden lg:inline">{{ user.username }}</span> {# عرض اسم المستخدم على الشاشات الكبيرة #}
+                                <i class="fas fa-chevron-down mr-2 text-sm"></i>
+                            </button>
+                            <div class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-20 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition duration-300 transform origin-top-right scale-95 group-hover:scale-100">
+                                <a href="{% url 'core:profile' %}" class="block px-4 py-2 text-gray-800 hover:bg-blue-100 hover:text-blue-700">
+                                    <i class="fas fa-user-circle ml-2"></i> الملف الشخصي
+                                </a>
+                                <a href="{% url 'core:account_settings' %}" class="block px-4 py-2 text-gray-800 hover:bg-blue-100 hover:text-blue-700">
+                                    <i class="fas fa-cog ml-2"></i> الإعدادات
+                                </a>
+                                <div class="border-t border-gray-200 my-1"></div>
+                                <form action="{% url 'logout' %}" method="post" class="block">
+                                    {% csrf_token %} {# هذا ضروري للأمان #}
+                                    <button type="submit" class="w-full text-right px-4 py-2 text-red-600 hover:bg-red-100 hover:text-red-700">
+                                        <i class="fas fa-sign-out-alt ml-2"></i> تسجيل الخروج
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    {% else %}
+                        {# روابط الزوار (غير مسجلين دخول) #}
+                        <a href="{% url 'register_request' %}" class="btn-primary">سجل الآن</a>
+                        <a href="{% url 'login' %}" class="btn-secondary">تسجيل الدخول</a>
+                    {% endif %}
+                </div>
+
+                {# زر قائمة الهمبرغر (لشاشات الجوال) #}
+                <div class="md:hidden">
+                    <button id="mobile-menu-button" class="text-gray-600 hover:text-blue-600 focus:outline-none focus:text-blue-600">
+                        <i class="fas fa-bars text-2xl"></i>
+                    </button>
+                </div>
+            </nav>
+        </header>
+
+        {# قائمة الجوال (خارج الشاشة) #}
+        <div id="mobile-menu" class="fixed inset-0 bg-gray-800 bg-opacity-95 z-40 hidden md:hidden flex flex-col items-center justify-center transform translate-x-full transition-transform duration-300 ease-in-out">
+            <button id="close-mobile-menu-button" class="absolute top-4 left-4 text-white hover:text-gray-300 focus:outline-none">
+                <i class="fas fa-times text-3xl"></i>
+            </button>
+            <div class="flex flex-col space-y-6 text-center">
+                {# روابط المستخدم المسجل دخول (في قائمة الجوال) #}
+                {% if user.is_authenticated %}
+                    <div class="flex flex-col items-center mb-6">
+                        {% if user.profile_picture %}
+                            <img src="{{ user.profile_picture.url }}" alt="صورة الملف الشخصي" class="w-20 h-20 rounded-full object-cover border-4 border-blue-400 mb-3">
+                        {% else %}
+                            <img src="{% static 'images/default_profile.png' %}" alt="صورة افتراضية" class="w-20 h-20 rounded-full object-cover border-4 border-blue-400 mb-3">
+                        {% endif %}
+                        <span class="text-white text-xl font-semibold">{{ user.username }}</span>
+                    </div>
+                    <a href="{% url 'core:dashboard' %}" class="mobile-nav-link">لوحة التحكم</a>
+                    <a href="{% url 'inbox' %}" class="mobile-nav-link">الرسائل</a>
+                    <a href="{% url 'test_list' %}" class="mobile-nav-link">الاختبارات</a>
+                    <a href="{% url 'core:profile' %}" class="mobile-nav-link">الملف الشخصي</a>
+                    <a href="{% url 'core:account_settings' %}" class="mobile-nav-link">الإعدادات</a>
+                    <a href="{% url 'logout' %}" class="mobile-nav-link-red">تسجيل الخروج</a>
+                {% else %}
+                    {# روابط الزوار (غير مسجلين دخول) في قائمة الجوال #}
+                    <a href="{% url 'register_request' %}" class="mobile-nav-link-blue">سجل الآن</a>
+                    <a href="{% url 'login' %}" class="mobile-nav-link-green">تسجيل الدخول</a>
+                {% endif %}
+                <div class="border-t border-gray-700 w-1/2 mx-auto my-6"></div> {# فاصل #}
+                <a href="{% url 'core:index' %}" class="mobile-nav-link">الرئيسية</a>
+                <a href="{% url 'core:about_platform' %}" class="mobile-nav-link">عن المنصة</a>
+                <a href="{% url 'contacts:contact' %}" class="mobile-nav-link">تواصل معنا</a>
+            </div>
+        </div>
+
+        {# منطقة المحتوى الرئيسية #}
+        <main class="flex-grow container mx-auto p-4 md:p-8"> {# هوامش أكبر على الشاشات الكبيرة #}
+            {# منطقة عرض رسائل Django (مثل النجاح أو الخطأ) #}
+            {% if messages %}
+                <div class="my-6 space-y-3"> {# مسافات أكبر بين الرسائل #}
+                    {% for message in messages %}
+                        <div class="p-4 rounded-lg border-r-4 animate-fade-in flex items-center text-right
+                            {% if message.tags == 'success' %}bg-green-100 text-green-800 border-green-500{% endif %}
+                            {% if message.tags == 'error' %}bg-red-100 text-red-800 border-red-500{% endif %}
+                            {% if message.tags == 'warning' %}bg-yellow-100 text-yellow-800 border-yellow-500{% endif %}
+                            {% if message.tags == 'info' %}bg-blue-100 text-blue-800 border-blue-500{% endif %}" role="alert">
+                            <i class="
+                                {% if message.tags == 'success' %}fas fa-check-circle text-green-600{% endif %}
+                                {% if message.tags == 'error' %}fas fa-exclamation-circle text-red-600{% endif %}
+                                {% if message.tags == 'warning' %}fas fa-exclamation-triangle text-yellow-600{% endif %}
+                                {% if message.tags == 'info' %}fas fa-info-circle text-blue-600{% endif %}
+                            ml-3 text-xl"></i>
+                            <span class="font-medium text-base">{{ message }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            {% block content %}
+                {# المحتوى الخاص بالصفحة سيأتي هنا #}
+            {% endblock %}
+        </main>
+
+        {# تذييل الصفحة #}
+        <footer class="bg-gray-900 text-white p-8 md:p-12 mt-16"> {# خلفية أغمق وهوامش أكبر #}
+            <div class="container mx-auto grid grid-cols-1 md:grid-cols-3 gap-12 text-center md:text-right">
+                
+                {# القسم 1: روابط سريعة #}
+                <div>
+                    <h3 class="text-2xl font-semibold mb-6 text-blue-400">روابط سريعة</h3>
+                    <ul class="space-y-3 text-gray-300 text-lg">
+                        <li><a href="{% url 'core:index' %}" class="hover:text-blue-300 transition duration-300">الرئيسية</a></li>
+                        <li><a href="{% url 'core:about_platform' %}" class="hover:text-blue-300 transition duration-300">عن المنصة</a></li>
+                        <li><a href="{% url 'contacts:contact' %}" class="hover:text-blue-300 transition duration-300">تواصل معنا</a></li>
+                        {% if user.is_authenticated %}
+                            <li><a href="{% url 'core:dashboard' %}" class="hover:text-blue-300 transition duration-300">لوحة التحكم</a></li>
+                            <li><a href="{% url 'test_list' %}" class="hover:text-blue-300 transition duration-300">الاختبارات</a></li>
+                        {% endif %}
+                    </ul>
+                </div>
+
+                {# القسم 2: معلومات الاتصال #}
+                <div>
+                    <h3 class="text-2xl font-semibold mb-6 text-blue-400">اتصل بنا</h3>
+                    <ul class="space-y-3 text-gray-300 text-lg">
+                        {# تم عكس ترتيب الأيقونة والنص لتتناسب مع الصورة #}
+                        <li class="flex items-center justify-center md:justify-end">
+                            <a href="mailto:h55180d@gmail.com" class="hover:text-blue-300 transition duration-300 flex items-center justify-center md:justify-end">
+                                <i class="fas fa-envelope text-blue-300 ml-3"></i> {# نقل ml-3 للأيقونة #}
+                                <span>h55180d@gmail.com</span>
+                            </a>
+                        </li>
+                        <li class="flex items-center justify-center md:justify-end">
+                            {# تم تعديل رقم الواتساب ليكون بدون مسافات في الرابط، والنص كما هو #}
+                            <a href="https://wa.me/966501234567" target="_blank" rel="noopener noreferrer" class="hover:text-blue-300 transition duration-300 flex items-center justify-center md:justify-end">
+                                <i class="fab fa-whatsapp text-green-500 ml-3"></i> {# نقل ml-3 للأيقونة #}
+                                <span>+966 50 123 4567</span> 
+                            </a>
+                        </li>
+                        {# أضف معلومات اتصال أخرى مثل العنوان إن وجد #}
+                    </ul>
+                </div>
+
+                {# القسم 3: تابعنا #}
+                <div>
+                    <h3 class="text-2xl font-semibold mb-6 text-blue-400">تابعنا</h3>
+                    {# تم تعديل space-x-reverse لتطبيق المسافة من اليمين #}
+                    <div class="flex justify-center md:justify-end space-x-6"> 
+                        <a href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer" class="text-gray-300 hover:text-blue-300 transition duration-300">
+                            <i class="fab fa-instagram text-4xl"></i> {# أيقونة انستغرام #}
+                        </a>
+                        <a href="https://twitter.com/" target="_blank" rel="noopener noreferrer" class="text-gray-300 hover:text-blue-300 transition duration-300">
+                            <i class="fab fa-twitter text-4xl"></i> {# أيقونة تويتر #}
+                        </a>
+                        <a href="https://www.facebook.com/" target="_blank" rel="noopener noreferrer" class="text-gray-300 hover:text-blue-300 transition duration-300">
+                            <i class="fab fa-facebook-f text-4xl"></i> {# أيقونة فيسبوك #}
+                        </a>
+                        {# أضف روابط أخرى لوسائل التواصل الاجتماعي #}
+                    </div>
+                </div>
+            </div>
+
+            {# حقوق النشر #}
+            <div class="border-t border-gray-700 mt-10 pt-8 text-center text-gray-400 font-light text-sm">
+                &copy; 2025 منصة ضاد التعليمية. جميع الحقوق محفوظة.
+            </div>
+        </footer>
+    </div>
+
+    {# JavaScript مخصص لتشغيل قائمة الجوال #}
+    {% block extra_js %}
+    <script>
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const closeMobileMenuButton = document.getElementById('close-mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+
+        mobileMenuButton.addEventListener('click', () => {
+            mobileMenu.classList.remove('hidden');
+            setTimeout(() => {
+                mobileMenu.classList.remove('translate-x-full');
+            }, 10); /* مهلة قصيرة للسماح لـ 'hidden' بالاختفاء أولاً */
+        });
+
+        closeMobileMenuButton.addEventListener('click', () => {
+            mobileMenu.classList.add('translate-x-full');
+            setTimeout(() => {
+                mobileMenu.classList.add('hidden');
+            }, 300); /* تطابق مدة الانتقال */
+        });
+
+        // إغلاق القائمة عند النقر خارجها (للتجربة المكتبية، غير ضروري للجوال عادةً)
+        mobileMenu.addEventListener('click', (event) => {
+            if (event.target === mobileMenu) {
+                mobileMenu.classList.add('translate-x-full');
+                setTimeout(() => {
+                    mobileMenu.classList.add('hidden');
+                }, 300);
+            }
+        });
+
+        // عند تغيير حجم الشاشة من صغير إلى كبير، يتم إخفاء قائمة الجوال تلقائياً
+        window.addEventListener('resize', () => {
+            if (window.innerWidth >= 768) { // 768px هو breakpoint لـ 'md' في Tailwind
+                mobileMenu.classList.add('hidden');
+                mobileMenu.classList.add('translate-x-full');
+            }
+        });
+    </script>
+    {% endblock %}
+</body>
+</html>

@@ -1,0 +1,70 @@
+{% extends 'base.html' %} {# هذا السطر يخبر Django بتوسيع قالب base.html #}
+{% load static %} {# إذا كنت تستخدم أي ملفات ثابتة في هذا القالب #}
+
+{% block title %}تم إرسال رسالتك بنجاح - منصة ضاد التعليمية{% endblock %} {# لتحديد عنوان الصفحة #}
+
+{% block content %}
+<div class="relative min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 -mt-24"
+     style="background-image: url({% static 'images/success_bg.png' %}); background-size: cover; background-position: center;">
+    {# طبقة تظليل لجعل المحتوى يبرز #}
+    <div class="absolute inset-0 bg-gradient-to-br from-green-700 to-blue-800 opacity-70"></div> {# تدرج لوني للخلفية #}
+
+    <div class="relative z-10 w-full max-w-md bg-white p-8 md:p-10 rounded-xl shadow-2xl border-t-8 border-green-500 text-center animate-fade-in-up"> {# تصميم أفضل للبطاقة #}
+        
+        <div class="text-green-500 text-7xl mb-6 animate-bounce-once"> {# أيقونة نجاح كبيرة مع رسوم متحركة #}
+            <i class="fas fa-check-circle"></i>
+        </div>
+
+        <h1 class="text-4xl md:text-5xl font-extrabold text-green-700 mb-4 leading-tight">شكراً لك!</h1>
+        <p class="text-lg md:text-xl text-gray-700 mb-8 leading-relaxed">
+            لقد تم استلام رسالتك بنجاح.
+            <br>
+            سنتواصل معك في أقرب وقت ممكن.
+        </p>
+        <p class="text-gray-600 mb-8">
+            يمكنك الآن:
+        </p>
+
+        <div class="flex flex-col md:flex-row justify-center gap-4"> {# تباعد أفضل للأزرار #}
+            <a href="{% url 'contacts:contact' %}" class="inline-flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105">
+                <i class="fas fa-paper-plane ml-2"></i> إرسال رسالة أخرى
+            </a>
+            <a href="{% url 'core:index' %}" class="inline-flex items-center justify-center bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105">
+                <i class="fas fa-home ml-2"></i> العودة إلى الصفحة الرئيسية
+            </a>
+        </div>
+        
+        <p class="mt-8 text-sm text-gray-500">
+            نقدر تواصلك معنا واهتمامك بمنصة ضاد التعليمية.
+        </p>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_head %}
+<style>
+    /* الرسوم المتحركة */
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fade-in-up {
+        animation: fadeInUp 0.6s ease-out forwards;
+    }
+
+    @keyframes bounceOnce {
+        0%, 20%, 50%, 80%, 100% {
+            transform: translateY(0);
+        }
+        40% {
+            transform: translateY(-15px);
+        }
+        60% {
+            transform: translateY(-7px);
+        }
+    }
+    .animate-bounce-once {
+        animation: bounceOnce 1s ease-out forwards;
+    }
+</style>
+{% endblock %}

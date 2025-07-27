@@ -1,0 +1,195 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}ابدأ الاختبار: {{ test.title }}{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8 text-right"> {# خلفية خفيفة وهوامش #}
+    <div class="max-w-5xl mx-auto bg-white p-6 md:p-10 rounded-xl shadow-2xl border-t-8 border-blue-600 animate-fade-in-down"> {# بطاقة رئيسية أكبر وأكثر تميزاً #}
+
+        {# عنوان الاختبار ومعلومات عامة #}
+        <div class="text-center mb-10">
+            <h1 class="text-4xl md:text-5xl font-extrabold text-blue-800 mb-3 leading-tight">
+                اختبار: {{ test.title }}
+            </h1>
+            {% if test.is_placement_test %}
+                <p class="text-yellow-700 font-semibold text-xl md:text-2xl mb-2 flex items-center justify-center">
+                    <i class="fas fa-medal text-yellow-500 ml-3"></i> اختبار تحديد مستوى اللغة العربية:
+                    <span class="text-blue-600 mr-2">{{ test.get_level_display }}</span>
+                </p>
+            {% endif %}
+            <p class="text-gray-600 text-lg md:text-xl mb-6 flex items-center justify-center">
+                <i class="fas fa-hourglass-half ml-3"></i> لديك <span class="font-bold text-blue-700 mx-2">{{ test.duration_minutes }}</span> دقيقة لإكمال هذا الاختبار.
+            </p>
+
+            {# مؤقت الاختبار (مرئي) #}
+            <div class="bg-gray-100 p-4 rounded-lg shadow-inner inline-flex items-center text-xl font-bold text-gray-800 animate-pulse-once">
+                <i class="fas fa-clock text-blue-500 ml-3 text-2xl"></i> الوقت المتبقي:
+                <span id="countdown" class="text-blue-600 text-2xl mr-2">00:00</span>
+            </div>
+        </div>
+
+        {# رسائل Django (نجاح، خطأ، تحذير) #}
+        {% if messages %}
+            <ul class="mb-8 space-y-3">
+                {% for message in messages %}
+                    <li class="p-4 rounded-lg {% if message.tags == 'success' %}bg-green-100 text-green-800 border-r-4 border-green-500{% elif message.tags == 'error' %}bg-red-100 text-red-800 border-r-4 border-red-500{% elif message.tags == 'warning' %}bg-yellow-100 text-yellow-800 border-r-4 border-yellow-500{% else %}bg-blue-100 text-blue-800 border-r-4 border-blue-500{% endif %} flex items-center" role="alert">
+                        <i class="fas {% if message.tags == 'success' %}fa-check-circle{% elif message.tags == 'error' %}fa-exclamation-circle{% elif message.tags == 'warning' %}fa-exclamation-triangle{% else %}fa-info-circle{% endif %} ml-3 text-xl"></i>
+                        <span class="font-medium text-base">{{ message }}</span>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+        <form method="post" action="{% url 'submit_test' test_result.id %}" id="test-form" class="space-y-8"> {# أضف id للوصول من JS #}
+            {% csrf_token %}
+
+            {% for question in questions %}
+            <div class="bg-gray-50 p-6 rounded-lg shadow-md border-r-4 border-blue-400 animate-fade-in"> {# تصميم أفضل لبطاقة السؤال #}
+                <p class="text-lg md:text-xl font-bold text-gray-800 mb-4 flex items-start">
+                    <span class="text-blue-600 text-2xl font-extrabold ml-3">{{ forloop.counter }}.</span> {{ question.text }}
+                </p>
+                <div class="space-y-3"> {# تباعد أفضل بين الخيارات #}
+                    {% for option in question.option_set.all %}
+                    <label class="flex items-center p-4 rounded-md bg-white hover:bg-blue-50 border border-gray-200 cursor-pointer transition-all duration-300 ease-in-out shadow-sm has-[:checked]:bg-blue-100 has-[:checked]:border-blue-500 has-[:checked]:shadow-md"> {# تأثير عند الاختيار #}
+                        <input type="radio" name="question_{{ question.id }}" value="{{ option.id }}" class="form-radio h-5 w-5 text-blue-600 focus:ring-blue-500" required> {# حجم أكبر للراديو #}
+                        <span class="ml-4 text-gray-800 text-base md:text-lg flex-grow text-right">{{ option.text }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endfor %}
+
+            <div class="text-center mt-10">
+                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-10 rounded-lg shadow-lg transition duration-300 ease-in-out transform hover:scale-105 text-lg md:text-xl inline-flex items-center">
+                    <i class="fas fa-paper-plane ml-3"></i> إنهاء الاختبار وتسليم الإجابات
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const duration = {{ test.duration_minutes }};
+        let timer = duration * 60; // seconds
+        const countdownElement = document.getElementById('countdown');
+        const testForm = document.getElementById('test-form');
+
+        function updateCountdown() {
+            const minutes = Math.floor(timer / 60);
+            const seconds = timer % 60;
+
+            countdownElement.innerHTML = `${minutes < 10 ? '0' : ''}${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+
+            if (timer <= 60) { // لو تبقى دقيقة واحدة أو أقل، يصبح لون المؤقت أحمر
+                countdownElement.classList.remove('text-blue-600');
+                countdownElement.classList.add('text-red-600', 'animate-pulse');
+            } else {
+                countdownElement.classList.remove('text-red-600', 'animate-pulse');
+                countdownElement.classList.add('text-blue-600');
+            }
+
+            if (timer > 0) {
+                timer--;
+            } else {
+                clearInterval(interval);
+                alert('انتهى وقت الاختبار! سيتم تسليم إجاباتك تلقائيًا.');
+                testForm.submit(); // Automatically submit the form
+            }
+        }
+
+        // Start the countdown immediately
+        const interval = setInterval(updateCountdown, 1000);
+        updateCountdown(); // Initial call to display the time immediately
+
+        // Optional: Prevent form submission if time runs out and user tries to submit manually
+        // This is a client-side check, server-side validation is still essential.
+        testForm.addEventListener('submit', function(event) {
+            if (timer < 0) { // If timer is already below zero (meaning time ran out)
+                event.preventDefault(); // Prevent double submission
+                alert('انتهى وقت الاختبار بالفعل. تم تسليم إجاباتك.');
+            }
+        });
+    });
+</script>
+{% endblock %}
+
+{% block extra_head %}
+<style>
+    /* الرسوم المتحركة */
+    @keyframes fadeInDown {
+        from { opacity: 0; transform: translateY(-20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    @keyframes pulseOnce {
+        0% { transform: scale(1); opacity: 1; }
+        50% { transform: scale(1.05); opacity: 0.9; }
+        100% { transform: scale(1); opacity: 1; }
+    }
+    .animate-fade-in-down {
+        animation: fadeInDown 0.7s ease-out forwards;
+    }
+    .animate-fade-in {
+        animation: fadeIn 0.8s ease-out forwards;
+    }
+    .animate-pulse-once {
+        animation: pulseOnce 1s ease-out forwards; /* نبضة واحدة عند التحميل */
+    }
+    .animate-pulse {
+        animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+
+    /* كلاسات Tailwind لحقول الراديو */
+    /* قد تحتاج إلى تخصيص هذا في ملف CSS رئيسي أو استخدام مكونات مخصصة */
+    .form-radio {
+        appearance: none; /* إخفاء الشكل الافتراضي للمتصفح */
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        background-color: #fff;
+        border: 2px solid #D1D5DB; /* gray-300 */
+        border-radius: 50%; /* لجعلها دائرية */
+        display: inline-block;
+        position: relative;
+        cursor: pointer;
+        outline: none;
+        margin-left: 0.5rem; /* مسافة على اليمين في RTL */
+        flex-shrink: 0; /* منع التصغير */
+    }
+
+    .form-radio:checked {
+        background-color: #3B82F6; /* blue-600 */
+        border-color: #3B82F6; /* blue-600 */
+    }
+
+    .form-radio:checked::before {
+        content: '';
+        display: block;
+        width: 0.5rem; /* حجم النقطة الداخلية */
+        height: 0.5rem; /* حجم النقطة الداخلية */
+        border-radius: 50%;
+        background-color: #fff;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+
+    .form-radio:focus {
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5); /* focus:ring-blue-500 */
+    }
+
+    /* لضمان اتجاه النص من اليمين لليسار للحقول المدخلة يدويًا (خاصة إذا كان هناك input text) */
+    .text-input {
+        direction: rtl;
+        text-align: right;
+    }
+</style>
+{% endblock %}

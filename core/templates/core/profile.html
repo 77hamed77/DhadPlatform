@@ -1,0 +1,166 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}الملف الشخصي - منصة ضاد{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8 md:py-12 text-right"> {# إضافة مساحة داخلية وتأكيد محاذاة النص لليمين #}
+    <div class="max-w-4xl mx-auto bg-white p-6 md:p-10 rounded-lg shadow-xl border-t-8 border-blue-600 animate-fade-in-down"> {# ظل أعمق وحد علوي مميز ورسوم متحركة #}
+        <h1 class="text-3xl md:text-4xl font-extrabold text-blue-800 mb-8 text-center flex items-center justify-center">
+            <i class="fas fa-user-circle ml-3 text-4xl text-blue-500"></i> ملفك الشخصي
+        </h1>
+
+        {# رسائل Django #}
+        {% if messages %}
+            <ul class="mb-8 space-y-3"> {# زيادة المسافة بين الرسائل ومساحة أكبر أسفلها #}
+                {% for message in messages %}
+                    <li class="p-4 rounded-lg {% if message.tags == 'success' %}bg-green-100 text-green-800 border-r-4 border-green-500{% elif message.tags == 'error' %}bg-red-100 text-red-800 border-r-4 border-red-500{% elif message.tags == 'warning' %}bg-yellow-100 text-yellow-800 border-r-4 border-yellow-500{% else %}bg-blue-100 text-blue-800 border-r-4 border-blue-500{% endif %} flex items-center" role="alert">
+                        <i class="fas {% if message.tags == 'success' %}fa-check-circle{% elif message.tags == 'error' %}fa-exclamation-circle{% elif message.tags == 'warning' %}fa-exclamation-triangle{% else %}fa-info-circle{% endif %} ml-3 text-xl"></i>
+                        <span class="font-medium text-base">{{ message }}</span>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12"> {# زيادة الفجوة واستخدام lg:grid-cols-2 #}
+            {# قسم تعديل معلومات الملف الشخصي #}
+            <div class="bg-blue-50 p-6 md:p-8 rounded-lg shadow-lg border-r-4 border-blue-600"> {# لون خلفية مختلف وحد جانبي #}
+                <h2 class="text-2xl font-bold text-blue-800 mb-6 flex items-center">
+                    <i class="fas fa-edit ml-3 text-3xl text-blue-500"></i> معلوماتك الأساسية
+                </h2>
+                <form method="post" action="{% url 'core:profile' %}" enctype="multipart/form-data" class="space-y-6">
+                    {% csrf_token %}
+
+                    {# عرض الصورة الشخصية الحالية وحقل التغيير #}
+                    <div class="text-center mb-6">
+                        {% if form.instance.profile_picture %} {# استخدام instance للوصول إلى الصورة المخزنة #}
+                            <img src="{{ form.instance.profile_picture.url }}" alt="الصورة الشخصية الحالية" class="w-32 h-32 rounded-full object-cover border-4 border-blue-400 shadow-md mx-auto mb-3">
+                        {% else %}
+                            <img src="{% static 'images/default_avatar.png' %}" alt="لا توجد صورة" class="w-32 h-32 rounded-full object-cover border-4 border-gray-300 shadow-md mx-auto mb-3">
+                        {% endif %}
+                        <p class="text-sm text-gray-600">الصورة الشخصية الحالية</p>
+                    </div>
+
+                    {# عرض حقول النموذج باستثناء حقول تغيير كلمة المرور #}
+                    {% for field in form %}
+                        {% if field.name != 'old_password' and field.name != 'new_password1' and field.name != 'new_password2' %} {# استبعاد حقول كلمة المرور #}
+                            <div class="mb-4">
+                                <label for="{{ field.id_for_label }}" class="block text-gray-700 text-lg font-medium mb-2">{{ field.label }}:</label>
+                                {% if field.name == 'profile_picture' %}
+                                    <div class="flex items-center space-x-4"> {# لتحسين عرض حقل الملف #}
+                                        {{ field }}
+                                    </div>
+                                {% else %}
+                                    {{ field }}
+                                {% endif %}
+                                
+                                {% if field.help_text %}
+                                    <p class="text-sm text-gray-500 mt-1">{{ field.help_text }}</p>
+                                {% endif %}
+                                {% for error in field.errors %}
+                                    <p class="text-red-500 text-sm mt-1">{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+
+                    <div class="text-center mt-8">
+                        <button type="submit" class="inline-flex items-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105">
+                            <i class="fas fa-save ml-2"></i> حفظ التغييرات
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            {# قسم تغيير كلمة المرور #}
+            <div class="bg-purple-50 p-6 md:p-8 rounded-lg shadow-lg border-r-4 border-purple-600"> {# لون خلفية مختلف وحد جانبي #}
+                <h2 class="text-2xl font-bold text-purple-800 mb-6 flex items-center">
+                    <i class="fas fa-key ml-3 text-3xl text-purple-500"></i> تغيير كلمة المرور
+                </h2>
+                {# استخدام نموذج منفصل لتغيير كلمة المرور #}
+                <form method="post" action="{% url 'core:change_password' %}" class="space-y-6">
+                    {% csrf_token %}
+
+                    {# عرض حقول نموذج تغيير كلمة المرور فقط #}
+                    {# يفضل أن يتم تمرير نموذج تغيير كلمة المرور (مثلاً PasswordChangeForm) بشكل منفصل من الـ view #}
+                    {# هنا نفترض أن 'password_form' هو اسم النموذج إذا كان منفصلاً #}
+                    {% if password_form %}
+                        {% for field in password_form %}
+                            <div class="mb-4">
+                                <label for="{{ field.id_for_label }}" class="block text-gray-700 text-lg font-medium mb-2">{{ field.label }}:</label>
+                                {{ field }}
+                                {% if field.help_text %}
+                                    <p class="text-sm text-gray-500 mt-1">{{ field.help_text }}</p>
+                                {% endif %}
+                                {% for error in field.errors %}
+                                    <p class="text-red-500 text-sm mt-1">{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        {# إذا لم يتم تمرير password_form، استخدم حقول النموذج الرئيسي مع فلتر #}
+                        {% for field in form %}
+                            {% if field.name == 'old_password' or field.name == 'new_password1' or field.name == 'new_password2' %}
+                                <div class="mb-4">
+                                    <label for="{{ field.id_for_label }}" class="block text-gray-700 text-lg font-medium mb-2">{{ field.label }}:</label>
+                                    {{ field }}
+                                    {% if field.help_text %}
+                                        <p class="text-sm text-gray-500 mt-1">{{ field.help_text }}</p>
+                                    {% endif %}
+                                    {% for error in field.errors %}
+                                        <p class="text-red-500 text-sm mt-1">{{ error }}</p>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    {% endif %}
+
+                    <div class="text-center mt-8">
+                        <button type="submit" class="inline-flex items-center bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-8 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105">
+                            <i class="fas fa-key ml-2"></i> تغيير كلمة المرور
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_head %}
+<style>
+    /* كلاسات Tailwind التي طبقناها في widgets في forms.py */
+    .form-input {
+        @apply block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-lg;
+        text-align: right; /* لضمان محاذاة النص داخل الحقول لليمين */
+        direction: rtl; /* لضمان اتجاه النص من اليمين لليسار للحقول المدخلة يدويًا */
+    }
+
+    /* أنماط خاصة لأنواع معينة من الحقول أو الحاجة إلى تجاوز */
+    input[type="file"].form-input {
+        @apply py-2; /* تعديل الـ padding لحقول الملفات */
+        direction: rtl; /* قد لا يؤثر كثيرًا على حقل الملف نفسه ولكن جيد للتناسق */
+    }
+
+    /* تحسين لتحديد الجنس (radio buttons) */
+    .form-check-input { /* هذا الكلاس يجب أن يُطبق في forms.py إذا كان هناك radio buttons */
+        @apply w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600 ml-2;
+    }
+    .form-check-label { /* هذا الكلاس يجب أن يُطبق في forms.py */
+        @apply text-sm font-medium text-gray-900 dark:text-gray-300;
+    }
+
+    /* الرسوم المتحركة */
+    @keyframes fadeInDown {
+        from { opacity: 0; transform: translateY(-20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fade-in-down {
+        animation: fadeInDown 0.6s ease-out forwards;
+    }
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,138 @@
+{% extends 'base.html' %} {# يرث من القالب الأساسي لضمان وجود Tailwind CSS #}
+{% load static %} {# يمكن استخدامه لاحقا للملفات الثابتة الخاصة بـ core #}
+
+{% block title %}تسجيل الدخول - منصة ضاد التعليمية{% endblock %}
+
+{% block content %}
+{# خلفية جذابة وتوسيط عمودي/أفقي #}
+<div class="relative min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 -mt-24" 
+     style="background-image: url({% static 'images/dhad_favicon.ico' %}); background-size: cover; background-position: center;">
+    {# طبقة تظليل لجعل النموذج يبرز #}
+    <div class="absolute inset-0 bg-blue-900 opacity-60"></div>
+    
+    <div class="relative z-10 w-full max-w-md bg-white p-8 md:p-10 rounded-xl shadow-2xl border-t-4 border-blue-600 animate-fade-in-up"> {# إضافة ظل أعمق وحد علوي مميز ورسوم متحركة #}
+        <div class="text-center mb-8">
+            <img src="{% static 'images/dhad_favicon.ico' %}" alt="شعار منصة ضاد" class="mx-auto h-20 w-auto mb-4"> {# إضافة شعار للمصداقية #}
+            <h2 class="text-3xl md:text-4xl font-extrabold text-blue-800">أهلاً بعودتك!</h2>
+            <p class="mt-2 text-lg text-gray-600">سجل الدخول للمتابعة</p>
+        </div>
+
+        {# رسائل الأخطاء العامة (إذا كانت هناك مشاكل في تسجيل الدخول) #}
+        {% if form.errors %}
+            <div class="bg-red-100 border-r-4 border-red-500 text-red-800 p-4 rounded-lg mb-6 flex items-center" role="alert"> {# تحسين تصميم رسالة الخطأ #}
+                <i class="fas fa-exclamation-triangle ml-3 text-2xl"></i>
+                <div>
+                    <strong class="font-bold">خطأ في تسجيل الدخول!</strong>
+                    <span class="block sm:inline">اسم المستخدم أو كلمة المرور غير صحيحة. يرجى التحقق والمحاولة مرة أخرى.</span>
+                </div>
+            </div>
+        {% endif %}
+
+        {# رسائل Django العامة (مثل رسائل النجاح من views أخرى) #}
+        {% if messages %}
+            <ul class="mb-6 space-y-3">
+                {% for message in messages %}
+                    <li class="p-4 rounded-lg {% if message.tags == 'success' %}bg-green-100 text-green-800 border-r-4 border-green-500{% elif message.tags == 'error' %}bg-red-100 text-red-800 border-r-4 border-red-500{% elif message.tags == 'warning' %}bg-yellow-100 text-yellow-800 border-r-4 border-yellow-500{% else %}bg-blue-100 text-blue-800 border-r-4 border-blue-500{% endif %} flex items-center" role="alert">
+                        <i class="fas {% if message.tags == 'success' %}fa-check-circle{% elif message.tags == 'error' %}fa-exclamation-circle{% elif message.tags == 'warning' %}fa-exclamation-triangle{% else %}fa-info-circle{% endif %} ml-3 text-xl"></i>
+                        <span class="font-medium text-base">{{ message }}</span>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+        <form method="post" class="space-y-6 text-right"> {# تأكيد محاذاة النموذج لليمين #}
+            {% csrf_token %} {# هذا ضروري جداً للأمان في Django Forms #}
+
+            {# حقل اسم المستخدم #}
+            <div>
+                <label for="{{ form.username.id_for_label }}" class="block text-gray-700 text-lg font-medium mb-2">اسم المستخدم أو البريد الإلكتروني:</label>
+                <div class="relative"> {# لدمج الأيقونة مع حقل الإدخال #}
+                    <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                        <i class="fas fa-user text-gray-400"></i>
+                    </div>
+                    <input type="text" name="{{ form.username.name }}" id="{{ form.username.id_for_label }}"
+                           class="form-input pr-10" {# إضافة مساحة للأيقونة #}
+                           value="{{ form.username.value|default:'' }}"
+                           placeholder="أدخل اسم المستخدم أو البريد الإلكتروني" {# Placeholder للوضوح #}
+                           required autofocus dir="auto"> {# dir="auto" لتحسين التعامل مع RTL/LTR في الإدخال #}
+                </div>
+                {% if form.username.errors %}
+                    <p class="text-red-500 text-sm mt-1">{{ form.username.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            {# حقل كلمة المرور #}
+            <div>
+                <label for="{{ form.password.id_for_label }}" class="block text-gray-700 text-lg font-medium mb-2">كلمة المرور:</label>
+                <div class="relative"> {# لدمج الأيقونة مع حقل الإدخال #}
+                    <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                        <i class="fas fa-lock text-gray-400"></i>
+                    </div>
+                    <input type="password" name="{{ form.password.name }}" id="{{ form.password.id_for_label }}"
+                           class="form-input pr-10" {# إضافة مساحة للأيقونة #}
+                           placeholder="أدخل كلمة المرور" {# Placeholder للوضوح #}
+                           required dir="auto">
+                </div>
+                {% if form.password.errors %}
+                    <p class="text-red-500 text-sm mt-1">{{ form.password.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            {# حقل hidden لإعادة التوجيه بعد تسجيل الدخول (إذا جاء المستخدم من صفحة محمية) #}
+            <input type="hidden" name="next" value="{{ next }}">
+
+            {# خيار "تذكرني" #}
+            <div class="flex items-center justify-between text-right"> {# محاذاة لليمين #}
+                <div class="flex items-center">
+                    <input id="remember-me" name="remember_me" type="checkbox" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                    <label for="remember-me" class="mr-2 block text-sm text-gray-900">
+                        تذكرني
+                    </label>
+                </div>
+                <a href="#" class="font-medium text-blue-600 hover:text-blue-500 hover:underline">نسيت كلمة المرور؟</a>
+            </div>
+
+            <div>
+                <button type="submit" class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-lg font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-300 ease-in-out transform hover:scale-105">
+                    <span class="absolute right-0 inset-y-0 flex items-center pr-3">
+                        <i class="fas fa-sign-in-alt group-hover:translate-x-1 transition duration-150 ease-in-out"></i> {# أيقونة تسجيل الدخول مع تأثير تحليق #}
+                    </span>
+                    تسجيل الدخول
+                </button>
+            </div>
+        </form>
+
+        <div class="mt-8 text-center text-gray-600">
+            <p>ليس لديك حساب؟
+                <a href="{% url 'register_request' %}" class="font-medium text-green-600 hover:text-green-500 hover:underline">سجل الآن مجاناً!</a>
+            </p>
+            <p class="mt-2">
+                <a href="{% url 'core:index' %}" class="font-medium text-gray-500 hover:text-gray-700 hover:underline">العودة للصفحة الرئيسية</a>
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_head %}
+<style>
+    /* تعريف كلاس form-input ليستخدم Tailwind CSS */
+    .form-input {
+        @apply block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-lg;
+        text-align: right; /* لضمان محاذاة النص داخل الحقول لليمين */
+    }
+
+    /* بعض الأنماط للرسوم المتحركة إذا لم تكن موجودة في CSS الرئيسي */
+    @keyframes fadeInDown {
+        from { opacity: 0; transform: translateY(-20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fade-in-up {
+        animation: fadeInUp 0.5s ease-out forwards;
+    }
+</style>
+{% endblock %}

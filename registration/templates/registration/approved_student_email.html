@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تمت الموافقة على طلب تسجيلك في منصة ضاد التعليمية!</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+            text-align: right; /* محاذاة النص لليمين */
+            direction: rtl; /* اتجاه النص من اليمين لليسار */
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2a6496; /* لون أزرق داكن */
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        p {
+            margin-bottom: 15px;
+        }
+        .button {
+            display: block;
+            width: fit-content; /* يجعل الزر بعرض المحتوى فقط */
+            margin: 20px auto;
+            padding: 10px 20px;
+            background-color: #007bff; /* لون أزرق أساسي */
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .footer {
+            margin-top: 30px;
+            font-size: 0.9em;
+            color: #777;
+            border-top: 1px solid #eee;
+            padding-top: 15px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>تهانينا! 🎉</h1>
+        <p>أهلاً وسهلاً بك <strong>{{ student_name }}</strong>،</p>
+        <p>يسعدنا إعلامك بأنه تم قبول طلب تسجيلك في منصة ضاد التعليمية بنجاح، وقد أصبح حسابك جاهزاً للاستخدام!</p>
+        <p>يمكنك الآن تسجيل الدخول إلى المنصة باستخدام بريدك الإلكتروني <strong>{{ email }}</strong> وكلمة المرور التي اخترتها عند التسجيل.</p>
+
+        <a href="{{ login_link }}" class="button">تسجيل الدخول إلى المنصة</a>
+
+        <p>إذا كان لديك أي استفسارات أو احتجت إلى مساعدة، فلا تتردد في التواصل معنا.</p>
+
+        <p>مع خالص التحيات،</p>
+        <p><strong>فريق منصة ضاد التعليمية</strong></p>
+
+        <div class="footer">
+            <p>&copy; {% now "Y" %} منصة ضاد التعليمية. جميع الحقوق محفوظة.</p>
+        </div>
+    </div>
+</body>
+</html>

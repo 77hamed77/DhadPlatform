@@ -1,0 +1,365 @@
+{% extends 'base.html' %}
+{% load static %} {# لتحميل الملفات الثابتة إذا لزم الأمر #}
+
+{% block title %}{{ course.name }} - تفاصيل المادة{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8 text-right"> {# خلفية خفيفة وهوامش #}
+    <div class="max-w-7xl mx-auto bg-white p-6 md:p-10 rounded-xl shadow-2xl border-t-8 border-blue-600 animate-fade-in-down"> {# بطاقة رئيسية أكبر وأكثر تميزاً #}
+
+        {# عنوان المادة ووصفها #}
+        <div class="text-center mb-10">
+            <h1 class="text-4xl md:text-5xl font-extrabold text-blue-800 mb-4 leading-tight">{{ course.name }}</h1>
+            <p class="text-lg md:text-xl text-gray-700 max-w-3xl mx-auto">{{ course.description }}</p>
+        </div>
+
+        {# رسائل Django (نجاح، خطأ، تحذير) #}
+        {% if messages %}
+            <ul class="mb-8 space-y-3">
+                {% for message in messages %}
+                    <li class="p-4 rounded-lg {% if message.tags == 'success' %}bg-green-100 text-green-800 border-r-4 border-green-500{% elif message.tags == 'error' %}bg-red-100 text-red-800 border-r-4 border-red-500{% elif message.tags == 'warning' %}bg-yellow-100 text-yellow-800 border-r-4 border-yellow-500{% else %}bg-blue-100 text-blue-800 border-r-4 border-blue-500{% endif %} flex items-center" role="alert">
+                        <i class="fas {% if message.tags == 'success' %}fa-check-circle{% elif message.tags == 'error' %}fa-exclamation-circle{% elif message.tags == 'warning' %}fa-exclamation-triangle{% else %}fa-info-circle{% endif %} ml-3 text-xl"></i>
+                        <span class="font-medium text-base">{{ message }}</span>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+        {# معلومات المعلم وزر التواصل #}
+        {% if is_subscribed and course.classes.exists %} {# تأكد أن الطالب مشترك وأن هناك حلقات لهذه المادة #}
+            {% with student_class=request.user.enrolled_classes.filter(course=course).first %}
+                {% if student_class and student_class.teacher %}
+                    <div class="bg-blue-50 p-6 md:p-8 rounded-lg shadow-md border-r-4 border-blue-500 mb-10 flex flex-col md:flex-row justify-between items-center text-center md:text-right animate-fade-in">
+                        <div class="mb-4 md:mb-0 md:flex md:items-center">
+                            <i class="fas fa-chalkboard-teacher text-5xl text-blue-600 md:ml-4 mb-3 md:mb-0"></i>
+                            <div>
+                                <h2 class="text-2xl font-bold text-blue-800 mb-1">معلم المادة: <span class="text-blue-600">{{ student_class.teacher.full_name|default:student_class.teacher.username }}</span></h2>
+                                <p class="text-gray-700 text-lg">تواصل مع معلمك لأي استفسارات أو دعم.</p>
+                            </div>
+                        </div>
+                        <div>
+                            <a href="{% url 'start_or_get_conversation' other_user_id=student_class.teacher.id %}"
+                               class="inline-flex items-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg transition duration-300 ease-in-out transform hover:scale-105">
+                                <i class="fas fa-comments ml-3"></i> تواصل مع المعلم
+                            </a>
+                        </div>
+                    </div>
+                {% endif %}
+            {% endwith %}
+        {% endif %}
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10"> {# تصميم شبكي لتقسيم المحتوى #}
+            {# قسم الدروس المسجلة #}
+            <div class="bg-gray-50 p-6 md:p-8 rounded-lg shadow-xl border-r-4 border-blue-600 animate-fade-in">
+                <h2 class="text-3xl font-bold text-blue-800 mb-6 flex items-center">
+                    <i class="fas fa-video ml-3 text-blue-500 text-3xl"></i> الدروس المسجلة
+                </h2>
+                {% if lessons %}
+                    <div class="space-y-6">
+                        {% for lesson in lessons %}
+                            <div class="bg-white p-4 rounded-lg shadow-md hover:shadow-xl transition duration-300 ease-in-out flex items-start space-x-4 space-x-reverse border-b border-gray-200">
+                                {# صورة مصغرة للفيديو #}
+                                <div class="w-28 h-20 bg-gray-200 rounded-md flex-shrink-0 flex items-center justify-center overflow-hidden border border-gray-300">
+                                    {% if lesson.youtube_link %}
+                                        {# محاولة جلب الصورة المصغرة من يوتيوب، مع fallback #}
+                                        <img src="https://img.youtube.com/vi/{{ lesson.youtube_link|cut:'https://www.youtube.com/watch?v='|cut:'https://youtu.be/' }}/default.jpg" 
+                                             alt="Thumbnail" class="w-full h-full object-cover" 
+                                             onerror="this.onerror=null;this.src='https://placehold.co/112x80/E0E0E0/A0A0A0?text=فيديو';">
+                                    {% else %}
+                                        <span class="text-gray-500 text-sm">لا يوجد فيديو</span>
+                                    {% endif %}
+                                </div>
+                                <div class="flex-grow">
+                                    <h3 class="text-xl font-semibold text-gray-800 mb-1">{{ lesson.title }}</h3>
+                                    <p class="text-gray-600 text-sm mb-2">{{ lesson.description|truncatechars:100 }}</p>
+                                    <p class="text-gray-500 text-xs mb-3 flex items-center">
+                                        <i class="fas fa-calendar-alt ml-2"></i> تاريخ النشر: {{ lesson.published_date|date:"Y-m-d" }}
+                                    </p>
+                                    
+                                    {% if is_subscribed %}
+                                        <button class="play-video-button inline-flex items-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md shadow-sm transition duration-300 ease-in-out"
+                                                data-video-id="{{ lesson.youtube_link }}"
+                                                data-lesson-id="{{ lesson.id }}">
+                                            <i class="fas fa-play-circle ml-2"></i> تشغيل الفيديو
+                                        </button>
+                                    {% else %}
+                                        <p class="text-red-600 text-sm mt-3 flex items-center">
+                                            <i class="fas fa-lock ml-2"></i> للوصول إلى هذا الدرس، يرجى التواصل مع الإدارة للاشتراك.
+                                        </p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-gray-600 text-lg py-4">لا توجد دروس مسجلة لهذه المادة بعد.</p>
+                {% endif %}
+            </div>
+
+            {# قسم الملفات التعليمية #}
+            <div class="bg-gray-50 p-6 md:p-8 rounded-lg shadow-xl border-r-4 border-green-600 animate-fade-in">
+                <h2 class="text-3xl font-bold text-green-800 mb-6 flex items-center">
+                    <i class="fas fa-file-alt ml-3 text-green-500 text-3xl"></i> الملفات التعليمية
+                </h2>
+                {% if educational_files %}
+                    <div class="space-y-6">
+                        {% for file in educational_files %}
+                            <div class="bg-white p-4 rounded-lg shadow-md hover:shadow-xl transition duration-300 ease-in-out flex items-center space-x-4 space-x-reverse border-b border-gray-200">
+                                <i class="fas fa-file-download text-5xl text-green-500 flex-shrink-0"></i> {# أيقونة ملف #}
+                                <div>
+                                    <h3 class="text-xl font-semibold text-gray-800 mb-1">{{ file.title }}</h3>
+                                    <p class="text-gray-600 text-sm mb-2">{{ file.description|truncatechars:100 }}</p>
+                                    <p class="text-gray-500 text-xs mb-3 flex items-center">
+                                        <i class="fas fa-upload ml-2"></i> تم الرفع: {{ file.uploaded_at|date:"Y-m-d" }}
+                                    </p>
+                                    <a href="{{ file.file.url }}" target="_blank" class="inline-flex items-center text-blue-600 hover:underline text-base font-medium mt-2">
+                                        <i class="fas fa-eye ml-2"></i> عرض / تنزيل الملف
+                                    </a>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-gray-600 text-lg py-4">لا توجد ملفات تعليمية لهذه المادة بعد.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        {# قسم الواجبات #}
+        {% if is_subscribed %} {# عرض الواجبات فقط للطلاب المشتركين #}
+            <div class="bg-red-50 p-6 md:p-8 rounded-lg shadow-xl border-r-4 border-red-600 mt-10 animate-fade-in">
+                <h2 class="text-3xl font-bold text-red-800 mb-6 flex items-center">
+                    <i class="fas fa-tasks ml-3 text-red-500 text-3xl"></i> الواجبات
+                </h2>
+                {% if assignments %}
+                    <div class="space-y-6">
+                        {% for assignment_data in assignments %}
+                            {% with assignment=assignment_data.assignment submitted_data=assignment_data.submitted_data has_submitted=assignment_data.has_submitted submission_form=assignment_data.submission_form %}
+                                <div class="bg-white p-4 rounded-lg shadow-md hover:shadow-xl transition duration-300 ease-in-out border-b border-gray-200">
+                                    <h3 class="text-xl font-semibold text-gray-800 mb-2 flex items-center">
+                                        <i class="fas fa-clipboard-list ml-2 text-red-500"></i> {{ assignment.title }}
+                                    </h3>
+                                    <p class="text-gray-600 text-sm mb-2">{{ assignment.description }}</p>
+                                    <p class="text-gray-500 text-xs mb-3 flex items-center">
+                                        <i class="fas fa-calendar-times ml-2"></i> تاريخ التسليم: {{ assignment.due_date|date:"Y-m-d H:i" }} |
+                                        <i class="fas fa-star ml-2 mr-2"></i> أقصى درجة: {{ assignment.max_score }}
+                                    </p>
+
+                                    {% if assignment.assignment_file %}
+                                        <a href="{{ assignment.assignment_file.url }}" target="_blank" class="inline-flex items-center text-blue-600 hover:underline text-sm font-medium mb-3">
+                                            <i class="fas fa-download ml-2"></i> تنزيل ملف الواجب
+                                        </a>
+                                    {% endif %}
+
+                                    {% if has_submitted %}
+                                        <div class="bg-green-100 text-green-800 border-r-4 border-green-500 p-4 rounded-md mt-4 flex items-start">
+                                            <i class="fas fa-check-circle text-2xl text-green-600 ml-3 flex-shrink-0"></i>
+                                            <div>
+                                                <p class="font-bold text-lg mb-1">لقد قمت بتسليم هذا الواجب!</p>
+                                                <p class="text-sm mb-1">الحالة: <span class="font-semibold">{{ submitted_data.get_status_display }}</span></p>
+                                                {% if submitted_data.score is not None %} {# استخدام is not None للتحقق من وجود الدرجة #}
+                                                    <p class="text-sm mb-1">الدرجة: <span class="font-semibold">{{ submitted_data.score }} / {{ assignment.max_score }}</span></p>
+                                                {% else %}
+                                                    <p class="text-sm mb-1 text-yellow-700"><i class="fas fa-hourglass-half ml-1"></i> لم يتم تصحيح الواجب بعد.</p>
+                                                {% endif %}
+                                                {% if submitted_data.teacher_notes %}
+                                                    <p class="text-sm mb-1">ملاحظات المعلم: <span class="italic">{{ submitted_data.teacher_notes }}</span></p>
+                                                {% endif %}
+                                                <p class="text-sm mb-2">تم التسليم في: {{ submitted_data.submitted_at|date:"Y-m-d H:i" }}</p>
+                                                <a href="{{ submitted_data.submitted_file.url }}" target="_blank" class="inline-flex items-center text-blue-600 hover:underline text-sm font-medium">
+                                                    <i class="fas fa-file-alt ml-2"></i> عرض ملف التسليم
+                                                </a>
+                                            </div>
+                                        </div>
+                                    {% else %}
+                                        {# نموذج تسليم الواجب #}
+                                        <form method="post" action="{% url 'submit_assignment' assignment_id=assignment.id %}" enctype="multipart/form-data" class="mt-4 p-4 border border-gray-200 rounded-lg bg-gray-50 shadow-inner">
+                                            {% csrf_token %}
+                                            <div class="mb-4">
+                                                <label for="{{ submission_form.submitted_file.id_for_label }}" class="block text-gray-700 text-base font-medium mb-2">
+                                                    <i class="fas fa-upload ml-2"></i> ارفع ملف الواجب الخاص بك:
+                                                </label>
+                                                {{ submission_form.submitted_file }}
+                                                {% if submission_form.submitted_file.errors %}
+                                                    {% for error in submission_form.submitted_file.errors %}
+                                                        <p class="text-red-500 text-sm mt-1">{{ error }}</p>
+                                                    {% endfor %}
+                                                {% endif %}
+                                            </div>
+                                            <button type="submit" class="inline-flex items-center bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-5 rounded-md shadow-md transition duration-300 ease-in-out transform hover:scale-105">
+                                                <i class="fas fa-paper-plane ml-2"></i> تسليم الواجب
+                                            </button>
+                                        </form>
+                                    {% endif %}
+                                </div>
+                            {% endwith %}
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-gray-600 text-lg py-4">لا توجد واجبات لهذه المادة بعد.</p>
+                {% endif %}
+            </div>
+        {% endif %} {# نهاية is_subscribed للواجبات #}
+    </div>
+</div>
+
+{# مودال لعرض الفيديو #}
+<div id="videoModal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 z-50 hidden animate-fade-in">
+    <div class="bg-white rounded-lg shadow-xl overflow-hidden w-full max-w-4xl transform scale-95 animate-zoom-in"> {# حجم أكبر للمودال وتأثير تكبير #}
+        <div class="flex justify-between items-center p-4 bg-blue-600 text-white">
+            <h3 class="text-xl font-bold">مشغل الفيديو</h3>
+            <button id="closeModal" class="text-white hover:text-gray-200 focus:outline-none">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+        </div>
+        <div class="relative pb-[56.25%] h-0 overflow-hidden"> {# 16:9 Aspect Ratio (56.25% for height/width) #}
+            <iframe id="youtubePlayer" class="absolute top-0 left-0 w-full h-full" src="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const videoModal = document.getElementById('videoModal');
+        const closeModalBtn = document.getElementById('closeModal');
+        const youtubePlayer = document.getElementById('youtubePlayer');
+        const playButtons = document.querySelectorAll('.play-video-button');
+
+        // وظيفة لجلب CSRF token من الكوكيز
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    // Does this cookie string begin with the name we want?
+                    if (cookie.startsWith(name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        playButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const lessonId = this.dataset.lessonId;
+                const videoUrl = this.dataset.videoId;
+
+                // وظيفة بسيطة لاستخراج ID الفيديو
+                function extractVideoId(url) {
+                    if (!url) return '';
+                    // Updated regex to handle common YouTube URL formats
+                    const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i;
+                    const match = url.match(regex);
+                    return (match && match[1]) ? match[1] : '';
+                }
+
+                const cleanVideoId = extractVideoId(videoUrl);
+
+                if (cleanVideoId) {
+                    youtubePlayer.src = `https://www.youtube.com/embed/${cleanVideoId}?autoplay=1`;
+                    videoModal.classList.remove('hidden');
+                    videoModal.classList.add('flex'); // Show with flex to center content
+                } else {
+                    console.error('Invalid YouTube URL or video ID not found:', videoUrl);
+                    alert('عذراً، لا يمكن تشغيل الفيديو. الرابط غير صالح.');
+                }
+
+                // -----------------------------------------------------------
+                // منطق AJAX لتسجيل الدرس كمكتمل
+                // -----------------------------------------------------------
+                if (lessonId) {
+                    fetch(`/lesson/${lessonId}/mark_completed/`, { // تأكد من أن هذا المسار صحيح في urls.py
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': getCookie('csrftoken'), // جلب CSRF token
+                            'X-Requested-With': 'XMLHttpRequest' // للتعرف على طلب AJAX في Django
+                        },
+                        body: JSON.stringify({}) // يمكن إرسال بيانات إضافية هنا
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            console.log('Lesson marked as completed:', data.message);
+                            // يمكنك هنا تحديث واجهة المستخدم إذا لزم الأمر، مثلاً تغيير لون الزر
+                            // أو إظهار علامة "تمت المشاهدة"
+                        } else {
+                            console.error('Error marking lesson as completed:', data.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Fetch error:', error);
+                    });
+                }
+            });
+        });
+
+        closeModalBtn.addEventListener('click', function() {
+            youtubePlayer.src = ''; // إيقاف الفيديو
+            videoModal.classList.add('hidden');
+            videoModal.classList.remove('flex');
+        });
+
+        // إغلاق المودال عند النقر خارج الفيديو
+        videoModal.addEventListener('click', function(event) {
+            if (event.target === videoModal) {
+                youtubePlayer.src = ''; // إيقاف الفيديو
+                videoModal.classList.add('hidden');
+                videoModal.classList.remove('flex');
+            }
+        });
+
+        // إغلاق المودال عند الضغط على مفتاح ESC
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape' && !videoModal.classList.contains('hidden')) {
+                youtubePlayer.src = ''; // إيقاف الفيديو
+                videoModal.classList.add('hidden');
+                videoModal.classList.remove('flex');
+            }
+        });
+    });
+</script>
+{% endblock %}
+
+{% block extra_head %}
+<style>
+    /* الرسوم المتحركة */
+    @keyframes fadeInDown {
+        from { opacity: 0; transform: translateY(-20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    @keyframes zoomIn {
+        from { transform: scale(0.9); opacity: 0; }
+        to { transform: scale(1); opacity: 1; }
+    }
+    .animate-fade-in-down {
+        animation: fadeInDown 0.7s ease-out forwards;
+    }
+    .animate-fade-in {
+        animation: fadeIn 0.8s ease-out forwards;
+    }
+    .animate-zoom-in {
+        animation: zoomIn 0.3s ease-out forwards;
+    }
+
+    /* كلاسات Tailwind التي يجب تطبيقها في widgets في forms.py */
+    /* تأكد من أن هذه الكلاسات مطبقة على حقول النموذج في forms.py */
+    .form-input {
+        @apply block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-lg;
+        text-align: right; /* لضمان محاذاة النص داخل الحقول لليمين */
+        direction: rtl; /* لضمان اتجاه النص من اليمين لليسار للحقول المدخلة يدويًا */
+    }
+    input[type="file"].form-input {
+        @apply py-2; /* تعديل ارتفاع حقل رفع الملف */
+    }
+</style>
+{% endblock %}

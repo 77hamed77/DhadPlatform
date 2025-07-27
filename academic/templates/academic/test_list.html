@@ -1,0 +1,159 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}قائمة الاختبارات{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8 text-right"> {# خلفية خفيفة وهوامش #}
+    <div class="max-w-4xl mx-auto bg-white p-6 md:p-10 rounded-xl shadow-2xl border-t-8 border-blue-600 animate-fade-in-down"> {# بطاقة رئيسية أكبر وأكثر تميزاً #}
+
+        {# عنوان الصفحة #}
+        <div class="text-center mb-10">
+            <h1 class="text-4xl md:text-5xl font-extrabold text-blue-800 mb-3 leading-tight">
+                <i class="fas fa-clipboard-list text-blue-600 ml-3"></i> قائمة الاختبارات
+            </h1>
+            <p class="text-gray-600 text-lg md:text-xl max-w-2xl mx-auto">تصفح الاختبارات المتاحة لك وتابع تقدمك.</p>
+        </div>
+
+        {# رسائل Django (نجاح، خطأ، تحذير) - تصميم موحد #}
+        {% if messages %}
+            <ul class="mb-8 space-y-3">
+                {% for message in messages %}
+                    <li class="p-4 rounded-lg {% if message.tags == 'success' %}bg-green-100 text-green-800 border-r-4 border-green-500{% elif message.tags == 'error' %}bg-red-100 text-red-800 border-r-4 border-red-500{% elif message.tags == 'warning' %}bg-yellow-100 text-yellow-800 border-r-4 border-yellow-500{% else %}bg-blue-100 text-blue-800 border-r-4 border-blue-500{% endif %} flex items-center" role="alert">
+                        <i class="fas {% if message.tags == 'success' %}fa-check-circle{% elif message.tags == 'error' %}fa-exclamation-circle{% elif message.tags == 'warning' %}fa-exclamation-triangle{% else %}fa-info-circle{% endif %} ml-3 text-xl"></i>
+                        <span class="font-medium text-base">{{ message }}</span>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+        {% if tests %}
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8"> {# تباعد أكبر بين البطاقات #}
+                {% for item in tests %}
+                    {% with test=item.test status=item.status result=item.result %}
+                    <div class="bg-white p-6 rounded-xl shadow-lg border-b-6
+                        {% if test.is_placement_test %}border-yellow-500{% else %}border-blue-500{% endif %}
+                        hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 ease-in-out animate-fade-in"> {# تصميم بطاقة أكثر ديناميكية #}
+
+                        {# أيقونة ونوع الاختبار #}
+                        <div class="flex items-center mb-3">
+                            {% if test.is_placement_test %}
+                                <i class="fas fa-medal text-yellow-500 text-2xl ml-3"></i>
+                                <span class="text-yellow-700 font-bold text-lg">اختبار تحديد مستوى</span>
+                            {% else %}
+                                <i class="fas fa-book-open text-blue-500 text-2xl ml-3"></i>
+                                <span class="text-blue-700 font-bold text-lg">اختبار دوري</span>
+                            {% endif %}
+                        </div>
+                        
+                        {# عنوان الاختبار #}
+                        <h2 class="text-2xl font-extrabold {% if test.is_placement_test %}text-yellow-800{% else %}text-blue-800{% endif %} mb-3 leading-tight">
+                            {{ test.title }}
+                        </h2>
+                        
+                        {# مستوى اختبار تحديد المستوى (إذا كان موجوداً) #}
+                        {% if test.is_placement_test %}
+                            <p class="text-yellow-600 text-base mb-2 flex items-center">
+                                <i class="fas fa-chart-line ml-2"></i> المستوى المستهدف:
+                                <span class="font-semibold mr-1">{{ test.get_level_display }}</span>
+                            </p>
+                        {% endif %}
+                        
+                        {# الوصف والمدة #}
+                        <p class="text-gray-700 text-base mb-4">{{ test.description|truncatechars:180 }}</p>
+                        <p class="text-gray-500 text-sm mb-4 flex items-center">
+                            <i class="fas fa-hourglass-half ml-2"></i> المدة:
+                            <span class="font-semibold mr-1">{{ test.duration_minutes }}</span> دقيقة
+                        </p>
+                        
+                        <div class="mt-4 pt-4 border-t border-gray-200 flex flex-col sm:flex-row items-start sm:items-center justify-between space-y-3 sm:space-y-0"> {# فصل بصري وحاويات مرنة #}
+                            {# حالة الاختبار #}
+                            <span class="text-base font-semibold flex items-center
+                                {% if status == 'not_started' %}text-gray-500{% elif status == 'in_progress' %}text-blue-600 animate-pulse{% elif status == 'completed' %}text-purple-600{% elif status == 'finalized' %}text-green-600{% else %}text-gray-500{% endif %}">
+                                <i class="fas {% if status == 'not_started' %}fa-hourglass-start{% elif status == 'in_progress' %}fa-spinner fa-spin{% elif status == 'completed' %}fa-clipboard-check{% elif status == 'finalized' %}fa-check-double{% else %}fa-question-circle{% endif %} ml-2"></i>
+                                الحالة:
+                                {% if status == 'not_started' %}لم يتم البدء{% endif %}
+                                {% if status == 'in_progress' %}قيد التنفيذ{% endif %}
+                                {% if status == 'completed' %}مكتمل (بانتظار النتيجة){% endif %} {# حالة مؤقتة بعد التسليم وقبل التوجيه النهائي #}
+                                {% if status == 'finalized' %}تم الانتهاء{% endif %}
+                                {% if status == 'N/A' %}غير متاح{% endif %}
+                            </span>
+
+                            {# زر الإجراء أو النتيجة #}
+                            <div class="flex-shrink-0"> {# لمنع تقلص زر الإجراء #}
+                                {% if status == 'not_started' or status == 'in_progress' %}
+                                    <a href="{% url 'start_test' test.id %}" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-5 rounded-md inline-flex items-center transition duration-300 ease-in-out transform hover:scale-105 shadow-md">
+                                        <i class="fas {% if status == 'in_progress' %}fa-play-circle{% else %}fa-play{% endif %} ml-2"></i>
+                                        {% if status == 'in_progress' %}متابعة الاختبار{% else %}بدء الاختبار{% endif %}
+                                    </a>
+                                {% elif status == 'completed' %}
+                                    <span class="text-purple-600 font-bold text-base flex items-center">
+                                        <i class="fas fa-sync-alt fa-spin ml-2"></i> بانتظار المراجعة
+                                    </span>
+                                {% elif status == 'finalized' %}
+                                    <div class="text-green-700 font-bold text-base flex flex-col items-center sm:items-end">
+                                        {% if test.is_placement_test %}
+                                            <span class="flex items-center mb-1"><i class="fas fa-user-graduate ml-2"></i> مستواك: <span class="text-green-800 mr-1">{{ request.user.get_determined_arabic_level_display }}</span></span>
+                                            {# يمكن إضافة زر لعرض تفاصيل المستوى أو صفحة التوجيه هنا #}
+                                            <a href="#" class="text-blue-600 hover:underline text-sm mt-1">عرض التوصيات <i class="fas fa-chevron-left mr-1 text-xs"></i></a>
+                                        {% else %}
+                                            <span class="flex items-center mb-1"><i class="fas fa-percentage ml-2"></i> الدرجة: <span class="text-green-800 mr-1">{{ result.score }}</span>
+                                            {% if result and result.test.question_set.all.count > 0 %}
+                                                / {{ result.test.question_set.all.count }}
+                                            {% endif %}</span>
+                                            <a href="#" class="text-blue-600 hover:underline text-sm mt-1">عرض التفاصيل <i class="fas fa-chevron-left mr-1 text-xs"></i></a>
+                                        {% endif %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endwith %}
+                {% endfor %}
+            </div>
+        {% else %}
+            {# حالة عدم وجود اختبارات #}
+            <div class="bg-blue-50 p-6 rounded-lg shadow-md text-center border-r-4 border-blue-400 animate-fade-in">
+                <i class="fas fa-exclamation-circle text-blue-500 text-4xl mb-4"></i>
+                <p class="text-gray-700 text-lg mb-2">لا توجد اختبارات متاحة حالياً.</p>
+                {% if request.user.is_authenticated and request.user.role == 'student' %}
+                    {% if request.user.determined_arabic_level != 'unassigned' %}
+                        <p class="text-gray-600 mt-2">تم تحديد مستواك مسبقاً إلى <span class="font-bold text-blue-700">{{ request.user.get_determined_arabic_level_display }}</span>. قد لا توجد اختبارات تحديد مستوى جديدة متاحة لك في الوقت الحالي.</p>
+                        <p class="text-gray-600 mt-2">يرجى مراجعة صفحة الدورات التدريبية المتاحة لمستواك.</p>
+                    {% else %}
+                        <p class="text-gray-600 mt-2">يبدو أنه لا توجد اختبارات تحديد مستوى أساسية (A1) متاحة. يرجى التواصل مع الإدارة للمساعدة.</p>
+                    {% endif %}
+                {% else %}
+                    <p class="text-gray-600 mt-2">يرجى تسجيل الدخول أو إنشاء حساب لعرض الاختبارات المتاحة.</p>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_head %}
+<style>
+    /* الرسوم المتحركة */
+    @keyframes fadeInDown {
+        from { opacity: 0; transform: translateY(-20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    .animate-fade-in-down {
+        animation: fadeInDown 0.7s ease-out forwards;
+    }
+    .animate-fade-in {
+        animation: fadeIn 0.8s ease-out forwards;
+    }
+    .animate-pulse {
+        animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+    .fa-spin {
+        animation: fa-spin 2s infinite linear;
+    }
+</style>
+{% endblock %}

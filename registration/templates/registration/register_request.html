@@ -1,0 +1,119 @@
+{% extends 'base.html' %} {# يرث من القالب الأساسي لضمان وجود Tailwind CSS #}
+{% load static %} {# لتحميل الملفات الثابتة مثل JS لاحقًا إذا احتجنا #}
+
+{% block title %}تسجيل رغبة بالانضمام - منصة ضاد{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8 text-right"> {# خلفية خفيفة وهوامش #}
+    <div class="max-w-4xl mx-auto bg-white p-6 md:p-10 rounded-xl shadow-2xl border-t-8 border-blue-600 animate-fade-in-down"> {# بطاقة رئيسية أكبر وأكثر تميزاً #}
+
+        {# عنوان الصفحة والوصف #}
+        <div class="text-center mb-10">
+            <h1 class="text-4xl md:text-5xl font-extrabold text-blue-800 mb-3 leading-tight">
+                <i class="fas fa-user-plus text-blue-600 ml-3"></i> نموذج تسجيل رغبة بالانضمام
+            </h1>
+            <p class="text-gray-600 text-lg md:text-xl max-w-2xl mx-auto">
+                يرجى ملء النموذج أدناه لإبداء رغبتك بالانضمام إلى منصة ضاد التعليمية. سنتواصل معك قريباً لمساعدتك في بدء رحلتك التعليمية!
+            </p>
+        </div>
+
+        {# لعرض رسائل Django (نجاح، خطأ، تحذير) #}
+        {% if messages %}
+            <ul class="mb-8 space-y-3">
+                {% for message in messages %}
+                    <li class="p-4 rounded-lg {% if message.tags == 'success' %}bg-green-100 text-green-800 border-r-4 border-green-500{% elif message.tags == 'error' %}bg-red-100 text-red-800 border-r-4 border-red-500{% elif message.tags == 'warning' %}bg-yellow-100 text-yellow-800 border-r-4 border-yellow-500{% else %}bg-blue-100 text-blue-800 border-r-4 border-blue-500{% endif %} flex items-center" role="alert">
+                        <i class="fas {% if message.tags == 'success' %}fa-check-circle{% elif message.tags == 'error' %}fa-exclamation-circle{% elif message.tags == 'warning' %}fa-exclamation-triangle{% else %}fa-info-circle{% endif %} ml-3 text-xl"></i>
+                        <span class="font-medium text-base">{{ message }}</span>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+        <form method="post" class="space-y-6 animate-fade-in"> {# مسافات متسقة بين الحقول وتأثير دخول #}
+            {% csrf_token %} {# هذا ضروري جداً للأمان في Django Forms #}
+
+            {% for field in form %}
+                <div class="mb-4">
+                    <label for="{{ field.id_for_label }}" class="block text-gray-800 text-lg font-bold mb-2">
+                        {{ field.label }}
+                        {% if field.field.required %}
+                            <span class="text-red-500 mr-1">*</span> {# لإظهار الحقول المطلوبة مع مسافة #}
+                        {% endif %}
+                    </label>
+                    {{ field }} {# هذا سيقوم بعرض عنصر HTML للحقل (input, select, textarea) #}
+                    {% if field.help_text %}
+                        <p class="text-sm text-gray-500 mt-1 italic">{{ field.help_text }}</p> {# نص إرشادي مائل #}
+                    {% endif %}
+                    {% if field.errors %}
+                        {% for error in field.errors %}
+                            <p class="text-red-600 text-sm mt-1 flex items-center">
+                                <i class="fas fa-exclamation-circle ml-2"></i> {{ error }}
+                            </p> {# رسائل خطأ بلون أغمق وأيقونة #}
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            {% endfor %}
+
+            <div class="text-center mt-8"> {# مسافة علوية إضافية للزر #}
+                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-xl shadow-lg transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-blue-500 focus:ring-opacity-75 inline-flex items-center justify-center">
+                    <i class="fas fa-paper-plane ml-3"></i> إرسال طلب التسجيل
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_head %}
+<style>
+    /* الرسوم المتحركة */
+    @keyframes fadeInDown {
+        from { opacity: 0; transform: translateY(-20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    .animate-fade-in-down {
+        animation: fadeInDown 0.7s ease-out forwards;
+    }
+    .animate-fade-in {
+        animation: fadeIn 0.8s ease-out forwards;
+    }
+
+    /* كلاسات Tailwind التي طبقناها في widgets في forms.py (يجب أن تكون موجودة) */
+    .form-input, .form-select, .form-textarea {
+        @apply block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-lg;
+        text-align: right; /* لضمان محاذاة النص داخل الحقول لليمين */
+        direction: rtl; /* لضمان اتجاه النص من اليمين لليسار */
+    }
+
+    /* تخصيص لأزرار الراديو/checkboxes إذا لم تكن مصممة بواسطة Tailwind في Widgets */
+    input[type="radio"], input[type="checkbox"] {
+        /* تطبيق أنماط Tailwind يدوياً إن لم يتم ذلك عبر widgets */
+        @apply w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500;
+        margin-right: 0.5rem; /* مسافة بسيطة بين العنصر والنص الذي يليه */
+        margin-left: 0; /* إلغاء أي مسافة يسارية افتراضية */
+    }
+
+    /* لضمان محاذاة النص المرتبط بأزرار الراديو/checkboxes */
+    label[for^="id_"] { /* يستهدف التسميات التي تبدأ بـ id_ */
+        /* يمكن إضافة أنماط هنا للتأكد من المحاذاة الصحيحة للتسميات المرتبطة بعناصر مثل الراديو */
+    }
+
+    /* إذا كان لديك مجموعة من حقول الراديو معروضة كـ `<ul>` أو `<div>` */
+    .radio-group, .checkbox-group { /* مثال: كلاس تضعه حول مجموعة الراديو/تشك بوكس في الـ widget */
+        @apply flex flex-col space-y-2; /* لجعل كل خيار على سطر جديد */
+    }
+    .radio-group label, .checkbox-group label {
+        @apply inline-flex items-center cursor-pointer text-gray-700 text-base;
+        direction: rtl; /* لضمان اتجاه النص من اليمين لليسار للخيار بأكمله */
+        text-align: right; /* محاذاة النص لليمين */
+    }
+    .radio-group label input, .checkbox-group label input {
+        margin-left: 0.75rem; /* مسافة بين الـ input والتسمية في RTL */
+        margin-right: 0;
+    }
+</style>
+{% endblock %}

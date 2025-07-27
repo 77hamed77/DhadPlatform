@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}صندوق الوارد (الرسائل){% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8 text-right"> {# خلفية خفيفة وهوامش #}
+    <div class="max-w-4xl mx-auto bg-white p-6 md:p-10 rounded-xl shadow-2xl border-t-8 border-blue-600 animate-fade-in-down"> {# بطاقة رئيسية أكبر وأكثر تميزاً #}
+
+        {# عنوان الصفحة #}
+        <div class="text-center mb-10">
+            <h1 class="text-4xl md:text-5xl font-extrabold text-blue-800 mb-3 leading-tight">
+                <i class="fas fa-inbox text-blue-600 ml-3"></i> صندوق الوارد
+            </h1>
+            <p class="text-gray-600 text-lg md:text-xl max-w-2xl mx-auto">جميع محادثاتك في مكان واحد.</p>
+        </div>
+
+        {# رسائل Django (نجاح، خطأ، تحذير) - تصميم موحد #}
+        {% if messages %}
+            <ul class="mb-8 space-y-3">
+                {% for message in messages %}
+                    <li class="p-4 rounded-lg {% if message.tags == 'success' %}bg-green-100 text-green-800 border-r-4 border-green-500{% elif message.tags == 'error' %}bg-red-100 text-red-800 border-r-4 border-red-500{% elif message.tags == 'warning' %}bg-yellow-100 text-yellow-800 border-r-4 border-yellow-500{% else %}bg-blue-100 text-blue-800 border-r-4 border-blue-500{% endif %} flex items-center" role="alert">
+                        <i class="fas {% if message.tags == 'success' %}fa-check-circle{% elif message.tags == 'error' %}fa-exclamation-circle{% elif message.tags == 'warning' %}fa-exclamation-triangle{% else %}fa-info-circle{% endif %} ml-3 text-xl"></i>
+                        <span class="font-medium text-base">{{ message }}</span>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+        {% if conversations %}
+            <div class="space-y-5"> {# زيادة التباعد بين المحادثات #}
+                {% for conv in conversations %}
+                    <a href="{% url 'conversation_detail' conversation_id=conv.id %}" class="block bg-white p-5 rounded-xl shadow-md hover:shadow-xl transition duration-300 ease-in-out transform hover:-translate-y-1 border-r-6 border-blue-500 hover:border-blue-600 animate-fade-in"> {# تصميم بطاقة مميز #}
+                        <div class="flex justify-between items-center mb-3">
+                            {# عنوان المحادثة (اسم الطرف الآخر أو نوع المحادثة) #}
+                            <h3 class="text-xl md:text-2xl font-bold text-gray-800 flex items-center">
+                                {% if conv.conversation_type == 'private' %}
+                                    {# التغيير هنا: نفترض أن other_participant تم إعداده في الـ view #}
+                                    <i class="fas fa-user-circle text-blue-500 ml-3"></i> {# أيقونة للمحادثات الفردية #}
+                                    {{ conv.other_participant.full_name|default:conv.other_participant.username }}
+                                {% else %}
+                                    <i class="fas fa-users text-purple-500 ml-3"></i> {# أيقونة للمحادثات الجماعية #}
+                                    {% if conv.name %}{{ conv.name }}{% else %}محادثة جماعية{% endif %}
+                                {% endif %}
+                            </h3>
+                            {# وقت آخر تحديث #}
+                            <span class="text-sm text-gray-500 flex items-center">
+                                <i class="fas fa-clock ml-1"></i> {{ conv.updated_at|timesince }} مضت
+                            </span>
+                        </div>
+                        
+                        {# آخر رسالة #}
+                        <div class="flex items-center text-gray-600 text-base border-t border-gray-100 pt-3">
+                            <i class="fas fa-envelope-open text-gray-400 ml-3"></i> {# أيقونة صغيرة للرسالة #}
+                            <p class="truncate-2-lines flex-grow"> {# كلاس جديد لتقليص سطرين #}
+                                {% with last_message=conv.messages.last %}
+                                    {% if last_message %}
+                                        <strong class="font-semibold text-gray-700">{{ last_message.sender.full_name|default:last_message.sender.username }}:</strong> {{ last_message.content|truncatechars:80 }}
+                                    {% else %}
+                                        <span class="italic text-gray-500">لا توجد رسائل بعد.</span>
+                                    {% endif %}
+                                {% endwith %}
+                            </p>
+                            <i class="fas fa-chevron-left text-gray-400 mr-3 text-sm"></i> {# سهم يشير إلى النقر #}
+                        </div>
+                    </a>
+                {% endfor %}
+            </div>
+        {% else %}
+            {# حالة عدم وجود محادثات #}
+            <div class="bg-blue-50 p-6 rounded-lg shadow-md text-center border-r-4 border-blue-400 animate-fade-in">
+                <i class="fas fa-inbox text-blue-500 text-5xl mb-4"></i>
+                <p class="text-gray-700 text-lg mb-4">لا توجد محادثات في صندوق الوارد الخاص بك حالياً.</p>
+                <p class="text-gray-600 mb-6">ابدأ محادثة جديدة للتواصل مع الآخرين على المنصة!</p>
+                {# مثال لزر بدء محادثة جديدة، يتطلب URL مناسب #}
+                <a href="#" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-md transition duration-300 ease-in-out shadow-lg transform hover:scale-105 inline-flex items-center">
+                    <i class="fas fa-plus-circle ml-3"></i> بدء محادثة جديدة
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_head %}
+<style>
+    /* الرسوم المتحركة */
+    @keyframes fadeInDown {
+        from { opacity: 0; transform: translateY(-20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    .animate-fade-in-down {
+        animation: fadeInDown 0.7s ease-out forwards;
+    }
+    .animate-fade-in {
+        animation: fadeIn 0.8s ease-out forwards;
+    }
+
+    /* كلاس لتقليص النص إلى سطرين وإضافة علامة القطع */
+    .truncate-2-lines {
+        display: -webkit-box;
+        -webkit-line-clamp: 2; /* عرض سطرين فقط */
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+</style>
+{% endblock %}
