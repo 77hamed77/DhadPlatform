@@ -101,9 +101,7 @@ INSTALLED_APPS = [
     'academic',
     'messaging',
     'payments',
-    # لإعداد Tailwind CSS (سنأتي لذلك لاحقاً)
-    'tailwind',
-    'theme', # اسم التطبيق الذي سيحتوي ملفات Tailwind
+    'dashboard',
 ]
 
 4. تطبيق الترحيلات الأولية (Initial Migrations)

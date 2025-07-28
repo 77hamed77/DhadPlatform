@@ -4,8 +4,8 @@
 {% block title %}صندوق الوارد (الرسائل){% endblock %}
 
 {% block content %}
-<div class="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8 text-right"> {# خلفية خفيفة وهوامش #}
-    <div class="max-w-4xl mx-auto bg-white p-6 md:p-10 rounded-xl shadow-2xl border-t-8 border-blue-600 animate-fade-in-down"> {# بطاقة رئيسية أكبر وأكثر تميزاً #}
+<div class="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8 text-right" dir="rtl"> {# إضافة dir="rtl" هنا #}
+    <div class="max-w-4xl mx-auto bg-white p-6 md:p-10 rounded-xl shadow-2xl border-t-8 border-blue-600 animate-fade-in-down">
 
         {# عنوان الصفحة #}
         <div class="text-center mb-10">
@@ -28,31 +28,27 @@
         {% endif %}
 
         {% if conversations %}
-            <div class="space-y-5"> {# زيادة التباعد بين المحادثات #}
+            <div class="space-y-5">
                 {% for conv in conversations %}
-                    <a href="{% url 'conversation_detail' conversation_id=conv.id %}" class="block bg-white p-5 rounded-xl shadow-md hover:shadow-xl transition duration-300 ease-in-out transform hover:-translate-y-1 border-r-6 border-blue-500 hover:border-blue-600 animate-fade-in"> {# تصميم بطاقة مميز #}
+                    <a href="{% url 'messaging:conversation_detail' conversation_id=conv.id %}" class="block bg-white p-5 rounded-xl shadow-md hover:shadow-xl transition duration-300 ease-in-out transform hover:-translate-y-1 border-r-6 border-blue-500 hover:border-blue-600 animate-fade-in">
                         <div class="flex justify-between items-center mb-3">
-                            {# عنوان المحادثة (اسم الطرف الآخر أو نوع المحادثة) #}
                             <h3 class="text-xl md:text-2xl font-bold text-gray-800 flex items-center">
                                 {% if conv.conversation_type == 'private' %}
-                                    {# التغيير هنا: نفترض أن other_participant تم إعداده في الـ view #}
-                                    <i class="fas fa-user-circle text-blue-500 ml-3"></i> {# أيقونة للمحادثات الفردية #}
+                                    <i class="fas fa-user-circle text-blue-500 ml-3"></i>
                                     {{ conv.other_participant.full_name|default:conv.other_participant.username }}
                                 {% else %}
-                                    <i class="fas fa-users text-purple-500 ml-3"></i> {# أيقونة للمحادثات الجماعية #}
+                                    <i class="fas fa-users text-purple-500 ml-3"></i>
                                     {% if conv.name %}{{ conv.name }}{% else %}محادثة جماعية{% endif %}
                                 {% endif %}
                             </h3>
-                            {# وقت آخر تحديث #}
                             <span class="text-sm text-gray-500 flex items-center">
                                 <i class="fas fa-clock ml-1"></i> {{ conv.updated_at|timesince }} مضت
                             </span>
                         </div>
                         
-                        {# آخر رسالة #}
                         <div class="flex items-center text-gray-600 text-base border-t border-gray-100 pt-3">
-                            <i class="fas fa-envelope-open text-gray-400 ml-3"></i> {# أيقونة صغيرة للرسالة #}
-                            <p class="truncate-2-lines flex-grow"> {# كلاس جديد لتقليص سطرين #}
+                            <i class="fas fa-envelope-open text-gray-400 ml-3"></i>
+                            <p class="truncate-2-lines flex-grow">
                                 {% with last_message=conv.messages.last %}
                                     {% if last_message %}
                                         <strong class="font-semibold text-gray-700">{{ last_message.sender.full_name|default:last_message.sender.username }}:</strong> {{ last_message.content|truncatechars:80 }}
@@ -61,19 +57,18 @@
                                     {% endif %}
                                 {% endwith %}
                             </p>
-                            <i class="fas fa-chevron-left text-gray-400 mr-3 text-sm"></i> {# سهم يشير إلى النقر #}
+                            <i class="fas fa-chevron-left text-gray-400 mr-3 text-sm"></i>
                         </div>
                     </a>
                 {% endfor %}
             </div>
         {% else %}
-            {# حالة عدم وجود محادثات #}
             <div class="bg-blue-50 p-6 rounded-lg shadow-md text-center border-r-4 border-blue-400 animate-fade-in">
                 <i class="fas fa-inbox text-blue-500 text-5xl mb-4"></i>
                 <p class="text-gray-700 text-lg mb-4">لا توجد محادثات في صندوق الوارد الخاص بك حالياً.</p>
                 <p class="text-gray-600 mb-6">ابدأ محادثة جديدة للتواصل مع الآخرين على المنصة!</p>
-                {# مثال لزر بدء محادثة جديدة، يتطلب URL مناسب #}
-                <a href="#" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-md transition duration-300 ease-in-out shadow-lg transform hover:scale-105 inline-flex items-center">
+                {# التعديل هنا: توجيه الزر إلى صفحة اختيار المستلم #}
+                <a href="{% url 'messaging:new_conversation_selection' %}" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-md transition duration-300 ease-in-out shadow-lg transform hover:scale-105 inline-flex items-center">
                     <i class="fas fa-plus-circle ml-3"></i> بدء محادثة جديدة
                 </a>
             </div>
@@ -84,7 +79,6 @@
 
 {% block extra_head %}
 <style>
-    /* الرسوم المتحركة */
     @keyframes fadeInDown {
         from { opacity: 0; transform: translateY(-20px); }
         to { opacity: 1; transform: translateY(0); }
@@ -100,10 +94,9 @@
         animation: fadeIn 0.8s ease-out forwards;
     }
 
-    /* كلاس لتقليص النص إلى سطرين وإضافة علامة القطع */
     .truncate-2-lines {
         display: -webkit-box;
-        -webkit-line-clamp: 2; /* عرض سطرين فقط */
+        -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;
         overflow: hidden;
         text-overflow: ellipsis;

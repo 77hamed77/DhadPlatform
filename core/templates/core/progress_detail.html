@@ -1,0 +1,191 @@
+{% extends 'base.html' %} {# تأكد من أن هذا المسار صحيح لقالبك الأساسي #}
+{% load static %}
+
+{% block title %}تفاصيل التقدم - منصة ضاد{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8 md:py-12 text-right">
+    <div class="bg-white p-6 md:p-8 rounded-xl shadow-2xl mb-8 border-t-4 border-purple-600">
+        <h1 class="text-4xl md:text-5xl font-extrabold text-purple-800 mb-6 flex items-center justify-center">
+            <i class="fas fa-chart-bar ml-3 text-5xl text-purple-600"></i> تفاصيل تقدمي الدراسي
+        </h1>
+        <p class="text-lg text-gray-600 mb-8 text-center leading-relaxed">
+            هذه الصفحة تعرض تفاصيل دقيقة حول تقدمك في البرامج والمواد التعليمية، ونتائج اختباراتك، لمساعدتك على تتبع رحلتك التعليمية بنجاح.
+        </p>
+
+        {# شريط التقدم العام #}
+        <div class="bg-yellow-50 p-6 rounded-lg shadow-lg border-l-4 border-yellow-500 mb-8">
+            <h3 class="text-2xl font-semibold text-yellow-800 mb-4 flex items-center">
+                <i class="fas fa-chart-line ml-3 text-3xl"></i> التقدم الكلي
+            </h3>
+            <div class="w-full bg-gray-200 rounded-full h-8 mb-3 relative overflow-hidden">
+                <div class="bg-yellow-500 h-full rounded-full flex items-center justify-center transition-all duration-700 ease-out" style="width: {{ overall_completion_percentage|default:0 }}%;"> {# تم تغيير overall_progress_percentage إلى overall_completion_percentage #}
+                    {# Text inside bar for better readability if progress is significant #}
+                    {% if overall_completion_percentage > 15 %} 
+                        <span class="text-white text-base font-bold">{{ overall_completion_percentage|default:0 }}%</span>
+                    {% endif %}
+                </div>
+                {# Text outside if progress is too low for text inside #}
+                {% if overall_completion_percentage <= 15 %}
+                    <span class="absolute right-4 top-1/2 -translate-y-1/2 text-yellow-800 text-base font-bold">{{ overall_completion_percentage|default:0 }}%</span>
+                {% endif %}
+            </div>
+            <p class="text-gray-600 text-base font-medium">
+                <i class="fas fa-info-circle ml-1 text-yellow-600"></i> لقد أكملت <strong class="text-yellow-700">{{ overall_completion_percentage|default:0 }}%</strong> من رحلتك التعليمية حتى الآن.
+            </p>
+        </div>
+
+        {# *************************************************************** #}
+        {# قسم التوصيات - هنا تم تطبيق التعديل الرئيسي لمنع خطأ 'break' #}
+        {# *************************************************************** #}
+        <div class="bg-indigo-50 p-6 rounded-lg shadow-lg border-l-4 border-indigo-500 mb-8"> {# تغيير اللون لتمييزه عن الأقسام الأخرى #}
+            <h3 class="text-2xl font-semibold text-indigo-800 mb-4 flex items-center">
+                <i class="fas fa-lightbulb ml-3 text-3xl"></i> توصيات خاصة بك
+            </h3>
+            <ul class="space-y-3 text-gray-800 text-right">
+                {# سيتم عرض توصية واحدة فقط هنا بناءً على أول مادة تحتاج لتركيز #}
+                {% if first_course_recommendation %} {# هذا المتغير يجب أن يتم تمريره من الـ View #}
+                    <li class="flex items-start">
+                        <i class="fas fa-book-open text-blue-600 mt-1 ml-2 flex-shrink-0"></i>
+                        <span>
+                            <strong class="text-blue-700">تركيز على {{ first_course_recommendation.course.name }}:</strong> يبدو أنك أكملت {{ first_course_recommendation.completion_percentage }}% فقط من هذه المادة. حاول تخصيص المزيد من الوقت لدروسها.
+                        </span>
+                    </li>
+                {% else %}
+                    <li class="flex items-start">
+                        <i class="fas fa-check-circle text-green-600 mt-1 ml-2 flex-shrink-0"></i>
+                        <span>
+                            <strong class="text-green-700">عمل رائع!</strong> تقدمك ممتاز في المواد الحالية. استمر في المراجعة والتعلم.
+                        </span>
+                    </li>
+                {% endif %}
+
+                {# توصية عامة (يمكنك إضافة المزيد هنا إذا لزم الأمر) #}
+                <li class="flex items-start">
+                    <i class="fas fa-question-circle text-gray-600 mt-1 ml-2 flex-shrink-0"></i>
+                    <span>
+                        <strong class="text-gray-700">بحاجة للمساعدة؟</strong> لا تتردد في التواصل مع مشرفك الأكاديمي أو الدعم الفني لأي استفسارات.
+                    </span>
+                </li>
+            </ul>
+        </div>
+        {# *************************************************************** #}
+        {# نهاية قسم التوصيات المُحدّث #}
+        {# *************************************************************** #}
+
+
+        {# قسم تفاصيل تقدم الدروس والمحاضرات (لم يتم تغييره بشكل كبير باستثناء اسم المتغير) #}
+        <div class="bg-blue-50 p-6 rounded-lg shadow-lg border-l-4 border-blue-500 mb-8">
+            <h3 class="text-2xl font-semibold text-blue-800 mb-4 flex items-center">
+                <i class="fas fa-tasks ml-3 text-3xl"></i> تقدم الدروس والمحاضرات
+            </h3>
+            {% if courses_progress_data %} {# تم التأكد من أن المتغير هو courses_progress_data #}
+                <div class="space-y-6">
+                    {% for course_data in courses_progress_data %} {# تم تغيير program_course_data إلى course_data #}
+                        <div class="bg-white p-5 rounded-lg shadow-md border-l-4 border-blue-400 hover:shadow-xl transition-shadow duration-300">
+                            <h4 class="text-xl font-bold text-blue-700 mb-3">{{ course_data.course.name }}</h4>
+                            <p class="text-gray-600 text-sm mb-3 flex items-center">
+                                <i class="fas fa-check-double ml-2 text-blue-500"></i>
+                                اكتمل: <strong class="text-blue-700">{{ course_data.completed_lessons }}</strong> من أصل <strong class="text-blue-700">{{ course_data.total_lessons }}</strong> درس
+                            </p>
+                            <div class="w-full bg-gray-200 rounded-full h-3 mb-3">
+                                <div class="bg-blue-500 h-full rounded-full transition-all duration-500 ease-out" style="width: {{ course_data.completion_percentage }}%;"></div>
+                            </div>
+                            <p class="text-gray-600 text-sm font-semibold text-left mb-4">{{ course_data.completion_percentage }}%</p>
+
+                            {# تفاصيل الدروس الفردية (مفترض أنها تأتي ضمن course_data إذا لزم الأمر) #}
+                            {% if course_data.lessons_data %} {# تفترض أن lessons_data موجودة داخل course_data #}
+                                <div class="mt-4 border-t border-gray-200 pt-4">
+                                    <h5 class="text-lg font-bold text-gray-700 mb-3 flex items-center">
+                                        <i class="fas fa-list-ul ml-2 text-gray-500"></i> قائمة الدروس:
+                                    </h5>
+                                    <ul class="space-y-3 text-base">
+                                        {% for lesson_item in course_data.lessons_data %}
+                                            <li class="flex items-center p-2 rounded-md hover:bg-gray-50 transition-colors duration-200">
+                                                {% if lesson_item.is_completed %}
+                                                    <i class="fas fa-check-circle text-green-500 ml-3 text-lg"></i>
+                                                    <span class="text-green-700 font-semibold">{{ lesson_item.lesson.title }}</span>
+                                                {% else %}
+                                                    <i class="fas fa-circle text-gray-400 ml-3 text-lg"></i>
+                                                    <span class="text-gray-600">{{ lesson_item.lesson.title }}</span>
+                                                {% endif %}
+                                                {% if lesson_item.lesson.video_url %}
+                                                    <a href="{% url 'course_lesson_detail' course_data.course.id lesson_item.lesson.id %}" {# افتراض مسار لصفحة الدرس الفردية #}
+                                                       class="mr-auto text-blue-600 hover:text-blue-800 text-sm font-medium py-1.5 px-3 rounded-lg border border-blue-500 hover:border-blue-700 transition-colors duration-200 flex items-center">
+                                                        <i class="fas fa-play-circle ml-2"></i> مشاهدة
+                                                    </a>
+                                                {% endif %}
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            {% else %}
+                                <p class="text-gray-600 text-sm mt-4 text-center">لا توجد دروس معرفة لهذه المادة بعد.</p>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-gray-600 text-center py-6 flex items-center justify-center">
+                    <i class="fas fa-exclamation-circle ml-2 text-gray-500 text-xl"></i> لا توجد مواد مسجل بها حاليًا أو لا تتوفر بيانات للتقدم.
+                </p>
+            {% endif %}
+        </div>
+
+        {# قسم نتائج الاختبارات والتقييمات #}
+        <div class="bg-green-50 p-6 rounded-lg shadow-lg border-l-4 border-green-500">
+            <h3 class="text-2xl font-semibold text-green-800 mb-4 flex items-center">
+                <i class="fas fa-clipboard-check ml-3 text-3xl"></i> نتائج الاختبارات والتقييمات
+            </h3>
+            {% if placement_test_result %} {# تم تغيير student_test_results إلى placement_test_result #}
+                <div class="overflow-x-auto rounded-lg shadow-md">
+                    <table class="min-w-full bg-white">
+                        <thead class="bg-green-100 border-b border-green-200">
+                            <tr>
+                                <th class="py-3 px-4 text-right text-sm font-bold text-gray-700 uppercase tracking-wider">الاختبار</th>
+                                <th class="py-3 px-4 text-right text-sm font-bold text-gray-700 uppercase tracking-wider">الدرجة</th>
+                                <th class="py-3 px-4 text-right text-sm font-bold text-gray-700 uppercase tracking-wider">التاريخ</th>
+                                <th class="py-3 px-4 text-right text-sm font-bold text-gray-700 uppercase tracking-wider">الحالة</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200">
+                            {# بما أننا نتوقع نتيجة اختبار تحديد مستوى واحدة فقط، لا داعي لحلقة for هنا #}
+                            <tr class="hover:bg-gray-50 transition-colors duration-150">
+                                <td class="py-3 px-4 whitespace-nowrap text-gray-800">اختبار تحديد المستوى</td> {# اسم الاختبار ثابت #}
+                                <td class="py-3 px-4 whitespace-nowrap text-center">
+                                    <span class="font-bold text-xl 
+                                        {% if placement_test_result.score >= 50 %} {# افتراض درجة النجاح 50 أو استخدم placement_test_result.test.passing_score إذا كان متاحًا #}
+                                            text-green-600
+                                        {% else %}
+                                            text-red-600
+                                        {% endif %}
+                                    ">
+                                        {{ placement_test_result.score }}
+                                    </span>
+                                    <span class="text-gray-500"> / 100</span> {# افتراض الدرجة القصوى 100 #}
+                                </td>
+                                <td class="py-3 px-4 whitespace-nowrap text-gray-600">{{ placement_test_result.date_taken|date:"Y-m-d H:i" }}</td> {# استخدام date_taken بدلًا من start_time #}
+                                <td class="py-3 px-4 whitespace-nowrap text-center">
+                                    {% if placement_test_result.score >= 50 %}
+                                        <span class="bg-green-100 text-green-800 text-xs font-semibold px-3 py-1 rounded-full inline-block">اجتياز</span>
+                                    {% else %}
+                                        <span class="bg-red-100 text-red-800 text-xs font-semibold px-3 py-1 rounded-full inline-block">رسوب</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+            {% endif %}
+        </div>
+
+        <div class="mt-10 text-center">
+            <a href="{% url 'core:dashboard' %}" class="inline-flex items-center bg-gray-700 hover:bg-gray-800 text-white font-bold py-3 px-6 rounded-lg transition duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1"> {# تم تغيير 'core:dashboard' إلى 'dashboard:dashboard_home' بناءً على بنية URL الشائعة #}
+                <i class="fas fa-arrow-right ml-2 text-lg"></i> العودة إلى لوحة التحكم
+            </a>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

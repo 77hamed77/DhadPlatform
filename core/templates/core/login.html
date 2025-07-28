@@ -1,138 +1,413 @@
-{% extends 'base.html' %} {# يرث من القالب الأساسي لضمان وجود Tailwind CSS #}
-{% load static %} {# يمكن استخدامه لاحقا للملفات الثابتة الخاصة بـ core #}
+{% extends 'base.html' %}
+{% load static %}
 
 {% block title %}تسجيل الدخول - منصة ضاد التعليمية{% endblock %}
 
-{% block content %}
-{# خلفية جذابة وتوسيط عمودي/أفقي #}
-<div class="relative min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 -mt-24" 
-     style="background-image: url({% static 'images/dhad_favicon.ico' %}); background-size: cover; background-position: center;">
-    {# طبقة تظليل لجعل النموذج يبرز #}
-    <div class="absolute inset-0 bg-blue-900 opacity-60"></div>
+{% block extra_head %}
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+    * {
+        font-family: 'Cairo', sans-serif;
+    }
     
-    <div class="relative z-10 w-full max-w-md bg-white p-8 md:p-10 rounded-xl shadow-2xl border-t-4 border-blue-600 animate-fade-in-up"> {# إضافة ظل أعمق وحد علوي مميز ورسوم متحركة #}
-        <div class="text-center mb-8">
-            <img src="{% static 'images/dhad_favicon.ico' %}" alt="شعار منصة ضاد" class="mx-auto h-20 w-auto mb-4"> {# إضافة شعار للمصداقية #}
-            <h2 class="text-3xl md:text-4xl font-extrabold text-blue-800">أهلاً بعودتك!</h2>
-            <p class="mt-2 text-lg text-gray-600">سجل الدخول للمتابعة</p>
-        </div>
+    /* تدرجات عصرية */
+    .gradient-bg {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    
+    .glass-effect {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    /* رسوم متحركة متقدمة */
+    @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+    }
+    
+    @keyframes slideInRight {
+        from {
+            opacity: 0;
+            transform: translateX(50px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+    
+    @keyframes pulse-glow {
+        0%, 100% {
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.3);
+        }
+        50% {
+            box-shadow: 0 0 40px rgba(99, 102, 241, 0.6);
+        }
+    }
+    
+    .animate-float {
+        animation: float 3s ease-in-out infinite;
+    }
+    
+    .animate-slide-in-right {
+        animation: slideInRight 0.8s ease-out;
+    }
+    
+    .animate-pulse-glow {
+        animation: pulse-glow 2s ease-in-out infinite;
+    }
+    
+    /* تأثيرات التفاعل */
+    .input-group {
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .input-group::before {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 0;
+        height: 2px;
+        background: linear-gradient(90deg, #667eea, #764ba2);
+        transition: width 0.3s ease;
+    }
+    
+    .input-group:focus-within::before {
+        width: 100%;
+    }
+    
+    .form-input {
+        @apply block w-full px-4 py-4 border-2 border-gray-200 rounded-xl shadow-sm focus:outline-none focus:border-indigo-500 text-lg bg-gray-50 focus:bg-white transition-all duration-300;
+        text-align: right;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .btn-primary::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+        transition: left 0.5s;
+    }
+    
+    .btn-primary:hover::before {
+        left: 100%;
+    }
+    
+    /* أيقونات متحركة */
+    .icon-bounce {
+        transition: transform 0.3s ease;
+    }
+    
+    .icon-bounce:hover {
+        transform: scale(1.2);
+    }
+    
+    /* شكل هندسي في الخلفية */
+    .geometric-bg::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 100%;
+        height: 100%;
+        background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='4'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") repeat;
+        animation: float 20s linear infinite;
+    }
+    
+    /* تحسين الاستجابة للأخطاء */
+    .error-shake {
+        animation: shake 0.5s ease-in-out;
+    }
+    
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-5px); }
+        75% { transform: translateX(5px); }
+    }
+    
+    /* تأثير loading للزر */
+    .loading {
+        position: relative;
+        color: transparent;
+    }
+    
+    .loading::after {
+        content: '';
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        top: 50%;
+        left: 50%;
+        margin-left: -10px;
+        margin-top: -10px;
+        border: 2px solid #ffffff;
+        border-radius: 50%;
+        border-top-color: transparent;
+        animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+</style>
+{% endblock %}
 
-        {# رسائل الأخطاء العامة (إذا كانت هناك مشاكل في تسجيل الدخول) #}
-        {% if form.errors %}
-            <div class="bg-red-100 border-r-4 border-red-500 text-red-800 p-4 rounded-lg mb-6 flex items-center" role="alert"> {# تحسين تصميم رسالة الخطأ #}
-                <i class="fas fa-exclamation-triangle ml-3 text-2xl"></i>
-                <div>
-                    <strong class="font-bold">خطأ في تسجيل الدخول!</strong>
-                    <span class="block sm:inline">اسم المستخدم أو كلمة المرور غير صحيحة. يرجى التحقق والمحاولة مرة أخرى.</span>
+{% block content %}
+<!-- خلفية متدرجة مع أشكال هندسية -->
+<div class="gradient-bg geometric-bg relative min-h-screen flex items-center justify-center py-8 px-4 sm:px-6 lg:px-8 -mt-24">
+    
+    <!-- أشكال هندسية متحركة في الخلفية -->
+    <div class="absolute inset-0 overflow-hidden">
+        <div class="absolute top-20 right-20 w-32 h-32 bg-white bg-opacity-10 rounded-full animate-float"></div>
+        <div class="absolute bottom-32 left-16 w-24 h-24 bg-white bg-opacity-10 rounded-lg transform rotate-45 animate-float" style="animation-delay: 1s;"></div>
+        <div class="absolute top-1/2 left-1/4 w-16 h-16 bg-white bg-opacity-10 rounded-full animate-float" style="animation-delay: 2s;"></div>
+    </div>
+    
+    <!-- النموذج الرئيسي -->
+    <div class="relative z-10 w-full max-w-md">
+        <div class="glass-effect p-8 md:p-10 rounded-2xl shadow-2xl animate-slide-in-right">
+            
+            <!-- الهيدر -->
+            <div class="text-center mb-8">
+                <div class="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-indigo-500 to-purple-900 rounded-full mb-6 animate-pulse-glow">
+                    {% if 'dhad_favicon.ico' in STATIC_URL %}
+                        <img src="{% static 'images/dhad_favicon.ico' %}" alt="شعار منصة ضاد" class="w-12 h-12">
+                    {% else %}
+                        <i class="fas fa-graduation-cap text-white text-2xl"></i>
+                    {% endif %}
                 </div>
+                <h1 class="text-3xl md:text-4xl font-bold bg-gradient-to-r from-indigo-600 to-purple-900 bg-clip-text text-transparent mb-2">
+                    أهلاً بعودتك!
+                </h1> 👋
+                <p class="text-gray-600 text-lg">سجل الدخول لمتابعة رحلتك التعليمية</p>
             </div>
-        {% endif %}
 
-        {# رسائل Django العامة (مثل رسائل النجاح من views أخرى) #}
-        {% if messages %}
-            <ul class="mb-6 space-y-3">
+            <!-- رسائل الأخطاء العامة -->
+            {% if form.errors %}
+                <div class="bg-red-50 border-r-4 border-red-400 text-red-800 p-4 rounded-xl mb-6 error-shake" role="alert">
+                    <div class="flex items-center">
+                        <i class="fas fa-exclamation-triangle ml-3 text-xl icon-bounce"></i>
+                        <div>
+                            <strong class="font-bold">خطأ في تسجيل الدخول!</strong>
+                            <p class="text-sm mt-1">{{ form.non_field_errors.0|default:"اسم المستخدم أو كلمة المرور غير صحيحة. يرجى التحقق والمحاولة مرة أخرى." }}</p>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+
+            <!-- رسائل Django العامة -->
+            {% if messages %}
                 {% for message in messages %}
-                    <li class="p-4 rounded-lg {% if message.tags == 'success' %}bg-green-100 text-green-800 border-r-4 border-green-500{% elif message.tags == 'error' %}bg-red-100 text-red-800 border-r-4 border-red-500{% elif message.tags == 'warning' %}bg-yellow-100 text-yellow-800 border-r-4 border-yellow-500{% else %}bg-blue-100 text-blue-800 border-r-4 border-blue-500{% endif %} flex items-center" role="alert">
-                        <i class="fas {% if message.tags == 'success' %}fa-check-circle{% elif message.tags == 'error' %}fa-exclamation-circle{% elif message.tags == 'warning' %}fa-exclamation-triangle{% else %}fa-info-circle{% endif %} ml-3 text-xl"></i>
-                        <span class="font-medium text-base">{{ message }}</span>
-                    </li>
+                    <div class="p-4 rounded-xl mb-6 flex items-center {% if message.tags == 'success' %}bg-green-50 text-green-800 border-r-4 border-green-400{% elif message.tags == 'error' %}bg-red-50 text-red-800 border-r-4 border-red-400{% elif message.tags == 'warning' %}bg-yellow-50 text-yellow-800 border-r-4 border-yellow-400{% else %}bg-blue-50 text-blue-800 border-r-4 border-blue-400{% endif %}" role="alert">
+                        <i class="fas {% if message.tags == 'success' %}fa-check-circle{% elif message.tags == 'error' %}fa-exclamation-circle{% elif message.tags == 'warning' %}fa-exclamation-triangle{% else %}fa-info-circle{% endif %} ml-3 text-xl icon-bounce"></i>
+                        <span class="font-medium">{{ message }}</span>
+                    </div>
                 {% endfor %}
-            </ul>
-        {% endif %}
+            {% endif %}
 
-        <form method="post" class="space-y-6 text-right"> {# تأكيد محاذاة النموذج لليمين #}
-            {% csrf_token %} {# هذا ضروري جداً للأمان في Django Forms #}
-
-            {# حقل اسم المستخدم #}
-            <div>
-                <label for="{{ form.username.id_for_label }}" class="block text-gray-700 text-lg font-medium mb-2">اسم المستخدم أو البريد الإلكتروني:</label>
-                <div class="relative"> {# لدمج الأيقونة مع حقل الإدخال #}
-                    <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                        <i class="fas fa-user text-gray-400"></i>
-                    </div>
-                    <input type="text" name="{{ form.username.name }}" id="{{ form.username.id_for_label }}"
-                           class="form-input pr-10" {# إضافة مساحة للأيقونة #}
-                           value="{{ form.username.value|default:'' }}"
-                           placeholder="أدخل اسم المستخدم أو البريد الإلكتروني" {# Placeholder للوضوح #}
-                           required autofocus dir="auto"> {# dir="auto" لتحسين التعامل مع RTL/LTR في الإدخال #}
-                </div>
-                {% if form.username.errors %}
-                    <p class="text-red-500 text-sm mt-1">{{ form.username.errors.0 }}</p>
-                {% endif %}
-            </div>
-
-            {# حقل كلمة المرور #}
-            <div>
-                <label for="{{ form.password.id_for_label }}" class="block text-gray-700 text-lg font-medium mb-2">كلمة المرور:</label>
-                <div class="relative"> {# لدمج الأيقونة مع حقل الإدخال #}
-                    <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                        <i class="fas fa-lock text-gray-400"></i>
-                    </div>
-                    <input type="password" name="{{ form.password.name }}" id="{{ form.password.id_for_label }}"
-                           class="form-input pr-10" {# إضافة مساحة للأيقونة #}
-                           placeholder="أدخل كلمة المرور" {# Placeholder للوضوح #}
-                           required dir="auto">
-                </div>
-                {% if form.password.errors %}
-                    <p class="text-red-500 text-sm mt-1">{{ form.password.errors.0 }}</p>
-                {% endif %}
-            </div>
-
-            {# حقل hidden لإعادة التوجيه بعد تسجيل الدخول (إذا جاء المستخدم من صفحة محمية) #}
-            <input type="hidden" name="next" value="{{ next }}">
-
-            {# خيار "تذكرني" #}
-            <div class="flex items-center justify-between text-right"> {# محاذاة لليمين #}
-                <div class="flex items-center">
-                    <input id="remember-me" name="remember_me" type="checkbox" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
-                    <label for="remember-me" class="mr-2 block text-sm text-gray-900">
-                        تذكرني
+            <!-- النموذج -->
+            <form method="post" id="login-form" class="space-y-6 text-right">
+                {% csrf_token %}
+                
+                <!-- حقل اسم المستخدم -->
+                <div class="input-group">
+                    <label for="{{ form.username.id_for_label }}" class="block text-gray-100 text-lg font-semibold mb-3 flex items-center">
+                        <i class="fas fa-user ml-2 text-indigo-500"></i>
+                        اسم المستخدم أو البريد الإلكتروني
                     </label>
+                    <div class="relative">
+                        <input 
+                            type="text" 
+                            name="{{ form.username.name }}" 
+                            id="{{ form.username.id_for_label }}"
+                            class="form-input pr-12 {% if form.username.errors %}border-red-500 focus:border-red-500{% endif %}"
+                            value="{{ form.username.value|default:'' }}"
+                            placeholder="أدخل اسم المستخدم أو البريد الإلكتروني"
+                            required 
+                            autofocus 
+                            dir="auto"
+                        >
+                        <div class="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
+                            <i class="fas fa-envelope text-gray-400 text-lg"></i>
+                        </div>
+                    </div>
+                    {% if form.username.errors %}
+                        <p class="text-red-500 text-sm mt-2 flex items-center">
+                            <i class="fas fa-exclamation-circle ml-2"></i>
+                            {{ form.username.errors.0 }}
+                        </p>
+                    {% endif %}
                 </div>
-                <a href="#" class="font-medium text-blue-600 hover:text-blue-500 hover:underline">نسيت كلمة المرور؟</a>
-            </div>
 
-            <div>
-                <button type="submit" class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-lg font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-300 ease-in-out transform hover:scale-105">
-                    <span class="absolute right-0 inset-y-0 flex items-center pr-3">
-                        <i class="fas fa-sign-in-alt group-hover:translate-x-1 transition duration-150 ease-in-out"></i> {# أيقونة تسجيل الدخول مع تأثير تحليق #}
-                    </span>
-                    تسجيل الدخول
-                </button>
-            </div>
-        </form>
+                <!-- حقل كلمة المرور -->
+                <div class="input-group">
+                    <label for="{{ form.password.id_for_label }}" class="block text-gray-100 text-lg font-semibold mb-3 flex items-center">
+                        <i class="fas fa-lock ml-2 text-indigo-500"></i>
+                        كلمة المرور
+                    </label>
+                    <div class="relative">
+                        <input 
+                            type="password" 
+                            name="{{ form.password.name }}" 
+                            id="{{ form.password.id_for_label }}"
+                            class="form-input pr-12 pl-12 {% if form.password.errors %}border-red-500 focus:border-red-500{% endif %}"
+                            placeholder="أدخل كلمة المرور"
+                            required 
+                            dir="auto"
+                        >
+                        <div class="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
+                            <i class="fas fa-key text-gray-400 text-lg"></i>
+                        </div>
+                        <button type="button" id="toggle-password" class="absolute inset-y-0 left-0 pl-4 flex items-center text-gray-900 hover:text-gray-600 transition-colors">
+                            <i class="fas fa-eye text-lg"></i>
+                        </button>
+                    </div>
+                    {% if form.password.errors %}
+                        <p class="text-red-500 text-sm mt-2 flex items-center">
+                            <i class="fas fa-exclamation-circle ml-2"></i>
+                            {{ form.password.errors.0 }}
+                        </p>
+                    {% endif %}
+                </div>
 
-        <div class="mt-8 text-center text-gray-600">
-            <p>ليس لديك حساب؟
-                <a href="{% url 'register_request' %}" class="font-medium text-green-600 hover:text-green-500 hover:underline">سجل الآن مجاناً!</a>
-            </p>
-            <p class="mt-2">
-                <a href="{% url 'core:index' %}" class="font-medium text-gray-500 hover:text-gray-700 hover:underline">العودة للصفحة الرئيسية</a>
-            </p>
+                <!-- حقل hidden لإعادة التوجيه -->
+                <input type="hidden" name="next" value="{{ next }}">
+
+                <!-- خيارات إضافية -->
+                <div class="flex items-center justify-between text-right">
+                    <div class="flex items-center">
+                        <input 
+                            id="remember-me" 
+                            name="remember_me" 
+                            type="checkbox" 
+                            class="h-5 w-5 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded transition-all"
+                        >
+                        <label for="remember-me" class="mr-3 text-gray-100 font-medium">تذكرني</label>
+                    </div>
+                    
+                    <a href="https://wa.me/966501234567" 
+                       target="_blank" 
+                       rel="noopener noreferrer" 
+                       class="text-green-400 hover:text-green-500 transition-all duration-300 flex items-center group">
+                        <i class="fab fa-whatsapp text-xl ml-2 group-hover:scale-110 transition-transform"></i>
+                        <span class="text-sm font-medium group-hover:underline">نسيت كلمة المرور؟</span>
+                    </a>
+                </div>
+
+                <!-- زر تسجيل الدخول -->
+                <div class="pt-4">
+                    <button 
+                        type="submit" 
+                        id="login-btn"
+                        class="btn-primary group relative w-full flex justify-center py-4 px-6 border border-transparent text-lg font-bold rounded-xl text-white shadow-lg hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-indigo-300 transition-all duration-300 transform hover:scale-105"
+                    >
+                        <span class="flex items-center">
+                            <i class="fas fa-sign-in-alt ml-3 group-hover:translate-x-1 transition-transform duration-300"></i>
+                            <span id="btn-text">تسجيل الدخول</span>
+                        </span>
+                    </button>
+                </div>
+            </form>
+
+            <!-- روابط إضافية -->
+            <div class="mt-8 space-y-4 text-center">
+                <div class="relative">
+                    <div class="absolute inset-0 flex items-center">
+                        <div class="w-full border-t border-gray-300"></div>
+                    </div>
+                    <div class="relative flex justify-center text-sm">
+                        <span class="px-4 bg-white text-gray-500">أو</span>
+                    </div>
+                </div>
+                
+                <p class="text-gray-900">
+                    ليس لديك حساب؟
+                    <a href="{% url 'register_request' %}" class="font-bold text-green-400 hover:text-green-500 hover:underline transition-all duration-300 ml-1">
+                        سجل الآن مجاناً! 🎓
+                    </a>
+                </p>
+                
+                <p>
+                    <a href="{% url 'core:index' %}" class="text-gray-900 hover:text-gray-700 hover:underline transition-all duration-300 flex items-center justify-center">
+                        <i class="fas fa-home ml-2"></i>
+                        العودة للصفحة الرئيسية
+                    </a>
+                </p>
+            </div>
         </div>
     </div>
 </div>
-{% endblock %}
 
-{% block extra_head %}
-<style>
-    /* تعريف كلاس form-input ليستخدم Tailwind CSS */
-    .form-input {
-        @apply block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-lg;
-        text-align: right; /* لضمان محاذاة النص داخل الحقول لليمين */
+<script>
+// تفاعلية متقدمة
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('login-form');
+    const loginBtn = document.getElementById('login-btn');
+    const btnText = document.getElementById('btn-text');
+    const togglePassword = document.getElementById('toggle-password');
+    const passwordInput = document.getElementById('{{ form.password.id_for_label }}');
+    const usernameInput = document.getElementById('{{ form.username.id_for_label }}');
+    
+    // تبديل إظهار كلمة المرور
+    if (togglePassword && passwordInput) {
+        togglePassword.addEventListener('click', function() {
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            
+            const icon = this.querySelector('i');
+            icon.classList.toggle('fa-eye');
+            icon.classList.toggle('fa-eye-slash');
+        });
     }
-
-    /* بعض الأنماط للرسوم المتحركة إذا لم تكن موجودة في CSS الرئيسي */
-    @keyframes fadeInDown {
-        from { opacity: 0; transform: translateY(-20px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-    @keyframes fadeInUp {
-        from { opacity: 0; transform: translateY(20px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-    .animate-fade-in-up {
-        animation: fadeInUp 0.5s ease-out forwards;
-    }
-</style>
+    
+    // تأثيرات تفاعلية للحقول
+    const inputs = document.querySelectorAll('.form-input');
+    inputs.forEach(input => {
+        input.addEventListener('focus', function() {
+            this.parentElement.parentElement.classList.add('scale-105');
+        });
+        
+        input.addEventListener('blur', function() {
+            this.parentElement.parentElement.classList.remove('scale-105');
+        });
+    });
+    
+    // معالجة إرسال النموذج مع تأثير التحميل
+    form.addEventListener('submit', function(e) {
+        // إضافة تأثير التحميل
+        loginBtn.classList.add('loading');
+        loginBtn.disabled = true;
+        btnText.textContent = 'جاري تسجيل الدخول...';
+        
+        // السماح للنموذج بالإرسال للخادم
+        // e.preventDefault(); // إزالة هذا السطر للسماح بالإرسال الفعلي
+    });
+    
+    // تأثيرات إضافية للتحسين
+    const formContainer = document.querySelector('.glass-effect');
+    
+    // تأثير التركيز على النموذج
+    formContainer.addEventListener('mouseenter', function() {
+        this.style.transform = 'translateY(-5px)';
+    });
+    
+    formContainer.addEventListener('mouseleave', function() {
+        this.style.transform = 'translateY(0)';
+    });
+});
+</script>
 {% endblock %}

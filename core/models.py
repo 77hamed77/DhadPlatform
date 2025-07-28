@@ -2,7 +2,7 @@
 
 from django.contrib.auth.models import AbstractUser
 from django.db import models
-from django.utils import timezone # استيراد timezone
+from django.utils import timezone
 from django.apps import apps # Added to import models dynamically
 
 # --------------------------------------------------------------------------
@@ -49,12 +49,31 @@ class User(AbstractUser):
         verbose_name="الصورة الشخصية"
     )
 
+    # --------------------------------------------------------------------------
+    # إضافة خاصية 'full_name' هنا
+    # --------------------------------------------------------------------------
+    @property
+    def full_name(self):
+        """
+        يعيد الاسم الكامل للمستخدم، مكونًا من الاسم الأول والاسم الأخير.
+        """
+        if self.first_name and self.last_name:
+            # استخدم strip() لإزالة أي مسافات زائدة
+            return f"{self.first_name} {self.last_name}".strip()
+        elif self.first_name:
+            return self.first_name.strip()
+        elif self.last_name:
+            return self.last_name.strip()
+        return self.username # العودة إلى اسم المستخدم إذا لم يكن هناك اسم أول أو أخير
+
+
     class Meta:
         verbose_name = "المستخدم"
         verbose_name_plural = "المستخدمون"
 
+    # تعديل دالة __str__ لاستخدام full_name إن وجد
     def __str__(self):
-        return f"{self.username} ({self.get_role_display()})"
+        return self.full_name or self.username
 
     # --------------------------------------------------------------------------
     # دوال مساعدة لاسترجاع البرامج والمواد التي ينتمي إليها الطالب
@@ -65,13 +84,14 @@ class User(AbstractUser):
         يرجع قائمة بالبرامج الفريدة التي سجل فيها الطالب.
         """
         if self.role != 'student':
-            from django.apps import apps
-            Program = apps.get_model('academic', 'Program')
+            # ليس هناك حاجة لإعادة استيراد 'apps' إذا كانت مستوردة بالفعل في أعلى الملف
+            # من الأفضل استيرادها مرة واحدة في أعلى الملف
+            Program = apps.get_model('academic', 'Program') # CORRECTED: apps.get_model
             return Program.objects.none()
 
-        from django.apps import apps
+        # CORRECTED: apps.get_model everywhere
         Course = apps.get_model('academic', 'Course')
-        Program = apps.get_model('academic', 'Program')
+        Program = apps.get_model('academic', 'Program') # CORRECTED: apps.get_model
 
         enrolled_courses = Course.objects.filter(classes__students=self).distinct()
         programs = Program.objects.filter(courses__in=enrolled_courses).distinct().order_by('name')
@@ -90,12 +110,10 @@ class User(AbstractUser):
         يرجع قائمة بالمواد (الكورسات) الفريدة التي سجل فيها الطالب.
         """
         if self.role != 'student':
-            from django.apps import apps
-            Course = apps.get_model('academic', 'Course')
+            Course = apps.get_model('academic', 'Course') # CORRECTED: apps.get_model
             return Course.objects.none()
         
-        from django.apps import apps
-        Course = apps.get_model('academic', 'Course')
+        Course = apps.get_model('academic', 'Course') # CORRECTED: apps.get_model
         return Course.objects.filter(classes__students=self).distinct().order_by('name')
 
     # --------------------------------------------------------------------------
@@ -106,14 +124,12 @@ class User(AbstractUser):
         يرجع قائمة بالحلقات الدراسية (Classes) القادمة التي سجل فيها الطالب.
         """
         if self.role != 'student':
-            from django.apps import apps
-            Class = apps.get_model('academic', 'Class')
+            Class = apps.get_model('academic', 'Class') # CORRECTED: apps.get_model
             return Class.objects.none()
 
         now = timezone.now()
         
-        from django.apps import apps
-        Class = apps.get_model('academic', 'Class')
+        Class = apps.get_model('academic', 'Class') # CORRECTED: apps.get_model
 
         upcoming_classes = Class.objects.filter(
             students=self,
@@ -141,8 +157,8 @@ class User(AbstractUser):
         if self.role != 'student':
             return 0  # Only students have progress percentage
 
-        from django.apps import apps
         # Dynamically get models from the 'academic' app to avoid circular imports
+        # CORRECTED: apps.get_model everywhere
         Course = apps.get_model('academic', 'Course')
         Lesson = apps.get_model('academic', 'Lesson')
         LessonProgress = apps.get_model('academic', 'LessonProgress') # Assuming you have a LessonProgress model

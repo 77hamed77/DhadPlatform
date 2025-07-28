@@ -1,7 +1,8 @@
+# DhadPlatform/urls.py
 from django.contrib import admin
 from django.urls import path, include
 from django.contrib.auth import views as auth_views
-from django.views.generic import TemplateView  # تم استيراد TemplateView هنا
+from django.views.generic import TemplateView 
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -15,14 +16,28 @@ urlpatterns = [
     # مسارات تطبيق academic (لصفحات المواد والدروس)
     path('', include('academic.urls')),
     
-    # تم إضافة namespace='contacts' هنا
     path('contacts/', include('contacts.urls', namespace='contacts')), 
     
-    # مسارات تطبيق messaging (للرسائل)
     path('', include('messaging.urls')), 
+    
+    # لوحة التحكم الخاصة بالإدارة
+    path('admin-dashboard/', include('dashboard.urls')), 
+    
+    # مسارات Django Authentication Views لإعادة تعيين كلمة المرور
+    # هذه المسارات لم تعد ضرورية للطالب لتسجيل الدخول الأول،
+    # لكن يمكن الإبقاء عليها إذا كنت تريدها كخيار مستقبلي لإعادة تعيين كلمة المرور.
+    path('password_reset/',
+         auth_views.PasswordResetView.as_view(template_name='registration/password_reset_form.html'),
+         name='password_reset'),
+    path('password_reset/done/',
+         auth_views.PasswordResetDoneView.as_view(template_name='registration/password_reset_done.html'),
+         name='password_reset_done'),
+    path('reset/<uidb64>/<token>/',
+         auth_views.PasswordResetConfirmView.as_view(template_name='registration/password_reset_confirm.html'),
+         name='password_reset_confirm'),
+    path('reset/done/',
+         auth_views.PasswordResetCompleteView.as_view(template_name='registration/password_reset_complete.html'),
+         name='password_reset_complete'),
 ]
 
-
-# تعريف الـ handler404
-# هذا سيجعل Django يستخدم 404.html عندما لا يجد مسارًا
 handler404 = TemplateView.as_view(template_name='404.html')

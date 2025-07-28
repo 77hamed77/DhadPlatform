@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'messaging',     # لنظام الرسائل والمحادثات
     'payments',      # لإدارة الاشتراكات والدفع
     'contacts',
+    'dashboard',
 ]
 
 # إعدادات البرامج الوسيطة (Middleware)
@@ -162,26 +163,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # تعريف نموذج المستخدم المخصص الخاص بنا
 # هذا ضروري بعد إنشاء نموذج المستخدم في core/models.py
 AUTH_USER_MODEL = 'core.User'
-
-
-# إعدادات البريد الإلكتروني (SMTP)
-# هذه الإعدادات ضرورية لكي يتمكن Django من إرسال رسائل البريد الإلكتروني (مثل رسائل التفعيل)
-# ستكون معطلة في البداية، ستحتاج لملئها وتفعيلها عند النشر أو عندما تكون جاهزاً للاختبار
-# تأكد من استخدام متغيرات البيئة (مثل python-decouple) في الإنتاج بدلاً من وضعها هنا مباشرة.
-
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com' # <--- استبدل هذا بمضيف SMTP الخاص بك (مثلاً smtp.gmail.com)
-EMAIL_PORT = 587 # <--- عادةً ما يكون 587 لـ TLS أو 465 لـ SSL
-EMAIL_USE_TLS = True # <--- استخدم TLS إذا كان المنفذ 587
-# EMAIL_USE_SSL = True # <--- استخدم SSL إذا كان المنفذ 465 (تعليق EMAIL_USE_TLS إذا استخدمت هذا)
-
-# استخدم config() لسحب القيم من .env في بيئة الإنتاج أو كقيم افتراضية في التطوير
-EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='h55180d@gmail.com') # <<========== استخدام decouple
-EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='rax111rax') # <<========== استخدام decouple
-DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='h55180d@gmail.com') # <<========== استخدام decouple
-
-# البريد الإلكتروني الذي ستصلك إليه رسائل نموذج الاتصال
-CONTACT_FORM_RECIPIENT_EMAIL = config('CONTACT_FORM_RECIPIENT_EMAIL', default='h55180d@gmail.com') # <<========== استخدام decouple
 
 
 # ==============================================================================

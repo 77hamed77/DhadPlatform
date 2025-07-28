@@ -1,6 +1,6 @@
 # registration/models.py
 from django.db import models
-from core.models import User # تأكد من استيراد User الخاص بك
+from core.models import User 
 
 class RegistrationRequest(models.Model):
     STATUS_CHOICES = [
@@ -9,7 +9,7 @@ class RegistrationRequest(models.Model):
         ('rejected', 'تم الرفض'),
     ]
 
-    PAYMENT_METHOD_CHOICES = [ # <--- إضافة هذا
+    PAYMENT_METHOD_CHOICES = [ 
         ('shamcash', 'شام كاش'),
         ('bank_transfer', 'حوالات بنكية'),
         ('credit_card', 'بطاقة ائتمان'),
@@ -29,17 +29,19 @@ class RegistrationRequest(models.Model):
     email = models.EmailField(unique=True, verbose_name="البريد الإلكتروني")
     whatsapp_number = models.CharField(max_length=20, verbose_name="رقم واتساب للتواصل")
 
-    password_hash = models.CharField(max_length=128, verbose_name="كلمة المرور المشفرة")
+    # تمت إزالة password_hash هنا
+    # password_hash = models.CharField(max_length=128, verbose_name="كلمة المرور المشفرة")
+
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending', verbose_name="حالة الطلب")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="تاريخ الطلب")
     approved_at = models.DateTimeField(blank=True, null=True, verbose_name="تاريخ الموافقة")
     user = models.OneToOneField(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='registration_request_link', verbose_name="المستخدم المرتبط")
 
-    preferred_payment_method = models.CharField( # <--- إضافة هذا الحقل
+    preferred_payment_method = models.CharField(
         max_length=20,
         choices=PAYMENT_METHOD_CHOICES,
-        blank=True, # يمكن أن يكون فارغًا إذا لم يختاره المستخدم
-        null=True,  # يمكن أن يكون فارغًا في قاعدة البيانات
+        blank=True,
+        null=True,
         verbose_name="طريقة الدفع المفضلة"
     )
 

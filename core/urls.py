@@ -22,4 +22,9 @@ urlpatterns = [
     path('account-settings/', views.account_settings_view, name='account_settings'),
     path('test-404/', views.test_404_view, name='test_404'),
     path('about-platform/', views.about_platform, name='about_platform'),
+    
+    # --------------------------------------------------------------------------
+    # إضافة مسار URL الجديد لصفحة تفاصيل التقدم
+    # --------------------------------------------------------------------------
+    path('progress/', views.progress_detail, name='progress_detail'), # NEW URL
 ]

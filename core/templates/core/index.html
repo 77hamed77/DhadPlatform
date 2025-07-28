@@ -5,157 +5,344 @@
 
 {% block content %}
 
-{# 1. Hero Section - القسم العلوي البارز #}
-<section class="relative bg-gradient-to-l from-blue-800 to-green-700 text-white py-20 md:py-32 overflow-hidden">
-    {# نمط عربي في الخلفية (يتطلب static/images/arabic_pattern.png) #}
-    <div class="absolute inset-0 opacity-15" style="background-image: url({% static 'images/arabic_pattern.png' %}); background-size: cover; background-repeat: no-repeat; background-position: center;"></div>
+<!-- إضافة الأنيميشن CSS -->
+<style>
+    /* تحسين الأنيميشن والتفاعلية */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    @keyframes fadeInDown {
+        from {
+            opacity: 0;
+            transform: translateY(-30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    @keyframes slideInRight {
+        from {
+            opacity: 0;
+            transform: translateX(50px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+    
+    @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+    }
+    
+    .animate-fade-in-up {
+        animation: fadeInUp 0.8s ease-out forwards;
+    }
+    
+    .animate-fade-in-down {
+        animation: fadeInDown 0.8s ease-out forwards;
+    }
+    
+    .animate-slide-in-right {
+        animation: slideInRight 0.8s ease-out forwards;
+    }
+    
+    .animate-float {
+        animation: float 3s ease-in-out infinite;
+    }
+    
+    .glass-effect {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .gradient-text {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    
+    .card-hover {
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .card-hover:hover {
+        transform: translateY(-12px) scale(1.02);
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    }
+    
+    .btn-modern {
+        position: relative;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-modern::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+        transition: left 0.5s;
+    }
+    
+    .btn-modern:hover::before {
+        left: 100%;
+    }
+    
+    .pattern-overlay {
+        background-image: 
+            radial-gradient(circle at 25% 25%, rgba(255, 255, 255, 0.1) 2px, transparent 2px),
+            radial-gradient(circle at 75% 75%, rgba(255, 255, 255, 0.1) 2px, transparent 2px);
+        background-size: 50px 50px;
+    }
+    
+    .scroll-fade {
+        opacity: 0;
+        transform: translateY(30px);
+        transition: all 0.6s ease-out;
+    }
+    
+    .scroll-fade.visible {
+        opacity: 1;
+        transform: translateY(0);
+    }
+</style>
 
-    <div class="container mx-auto px-4 text-center relative z-10">
-        <h1 class="text-4xl md:text-6xl font-extrabold mb-6 leading-tight animate-fade-in-down">
-            أتقن اللغة <span class="text-yellow-300">العربية</span> مع منصة <span class="text-white-A700">ضاد</span> التعليمية
-        </h1>
-        <p class="text-xl md:text-2xl mb-10 max-w-4xl mx-auto leading-relaxed animate-fade-in-up">
-            منهاج متكامل، دروس تفاعلية، ومعلمون خبراء لمساعدتك على إتقان لغة القرآن والضاد بفعالية ومرونة.
-        </p>
-        <div class="space-x-4 flex justify-center flex-wrap-reverse gap-4 animate-zoom-in"> {# Reverse for RTL, gap for spacing #}
-            <a href="{% url 'core:about_platform' %}" class="inline-block bg-white text-blue-700 hover:bg-gray-100 font-bold py-3 px-8 rounded-full text-lg md:text-xl shadow-lg transform hover:scale-105 transition duration-300 ease-in-out">
-                <i class="fas fa-info-circle ml-2"></i> اعرف المزيد عنا
-            </a>
-            <a href="{% url 'register_request' %}" class="inline-block bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-8 rounded-full text-lg md:text-xl shadow-lg transform hover:scale-105 transition duration-300 ease-in-out">
-                سجل الآن مجاناً! <i class="fas fa-arrow-left mr-2"></i>
-            </a>
+{# 1. Hero Section - القسم العلوي البارز المحسن #}
+<section class="relative min-h-screen flex items-center bg-gradient-to-br from-indigo-900 via-purple-800 to-teal-700 text-white overflow-hidden">
+    {# خلفية متحركة معاصرة #}
+    <div class="absolute inset-0 pattern-overlay opacity-20"></div>
+    <div class="absolute inset-0">
+        <div class="absolute top-10 left-10 w-72 h-72 bg-gradient-to-r from-blue-400 to-purple-600 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-float"></div>
+        <div class="absolute top-0 right-10 w-96 h-96 bg-gradient-to-r from-teal-400 to-blue-600 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-float" style="animation-delay: -2s;"></div>
+        <div class="absolute bottom-20 left-1/2 w-80 h-80 bg-gradient-to-r from-purple-400 to-pink-600 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-float" style="animation-delay: -4s;"></div>
+    </div>
+
+    <div class="container mx-auto px-4 lg:px-8 text-center relative z-10">
+        <div class="max-w-5xl mx-auto">
+            <h1 class="text-4xl md:text-6xl lg:text-7xl font-black mb-8 leading-tight animate-fade-in-down">
+                أتقن اللغة <span class="bg-gradient-to-r from-yellow-300 to-orange-400 bg-clip-text text-transparent">العربية</span> 
+                <br class="hidden md:block">
+                مع منصة <span class="bg-gradient-to-r from-emerald-300 to-cyan-400 bg-clip-text text-transparent">ضاد</span> التعليمية
+            </h1>
+            <p class="text-lg md:text-xl lg:text-2xl mb-12 max-w-4xl mx-auto leading-relaxed text-gray-200 animate-fade-in-up" style="animation-delay: 0.2s;">
+                منصة تعليمية تسهل عملية اندماج الطلاب السوريين العائدين من الخارج أو المتأثرين بالحرب في النظام الأكاديمي السوري من جديد   
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center items-center animate-fade-in-up" style="animation-delay: 0.4s;">
+                <a href="{% url 'register_request' %}" class="group relative inline-flex items-center justify-center px-8 py-4 text-lg font-bold text-white transition-all duration-300 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-full shadow-lg hover:shadow-2xl hover:scale-105 btn-modern">
+                    <span class="relative z-10">سجل الآن مجاناً!</span>
+                    <i class="fas fa-arrow-left mr-3 group-hover:translate-x-1 transition-transform duration-300"></i>
+                </a>
+                <a href="{% url 'core:about_platform' %}" class="group inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-white border-2 border-white/30 rounded-full glass-effect hover:bg-white/10 transition-all duration-300 hover:scale-105">
+                    <i class="fas fa-info-circle ml-3 group-hover:rotate-12 transition-transform duration-300"></i>
+                    <span>اعرف المزيد عنا</span>
+                </a>
+            </div>
         </div>
+    </div>
+
+    {# إشارة للتمرير #}
+    <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-white/70 animate-bounce">
+        <i class="fas fa-chevron-down text-2xl"></i>
     </div>
 </section>
 
-{# 2. Features Section - لماذا تختار ضاد؟ (يمكن إعادة استخدام بطاقات من صفحة about) #}
-<section class="py-16 md:py-24 bg-gray-50">
-    <div class="container mx-auto px-4 text-center">
-        <h2 class="text-3xl md:text-4xl font-bold text-blue-800 mb-12">
-            لماذا يختار الطلاب <span class="text-green-600">منصة ضاد</span>؟
-        </h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 text-right">
-
+{# 2. Features Section - لماذا تختار ضاد؟ #}
+<section class="py-20 lg:py-32 bg-gradient-to-b from-gray-50 to-white">
+    <div class="container mx-auto px-4 lg:px-8">
+        <div class="text-center mb-16 scroll-fade">
+            <h2 class="text-4xl lg:text-5xl font-black text-gray-900 mb-6">
+                لماذا يختار الطلاب <span class="gradient-text">منصة ضاد</span>؟
+            </h2>
+            <p class="text-xl text-gray-600 max-w-3xl mx-auto">اكتشف الميزات التي تجعل من منصة ضاد الخيار الأمثل لتعلم اللغة العربية</p>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-12">
             {# بطاقة الميزة 1 #}
-            <div class="bg-white p-8 rounded-lg shadow-md hover:shadow-xl transform hover:-translate-y-2 transition duration-300 ease-in-out">
-                <div class="text-green-500 text-5xl mb-4">
-                    <i class="fas fa-chalkboard-teacher"></i>
+            <div class="group bg-white p-8 lg:p-10 rounded-3xl shadow-lg card-hover border border-gray-100 scroll-fade">
+                <div class="mb-6">
+                    <div class="w-16 h-16 bg-gradient-to-br from-emerald-400 to-teal-600 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+                        <i class="fas fa-chalkboard-teacher text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-4">معلمون خبراء ومؤهلون</h3>
+                    <p class="text-gray-600 leading-relaxed">
+                        استفد من خبرة نخبة من المعلمين المتخصصين في تعليم اللغة العربية، بأساليب مبتكرة ومعاصرة.
+                    </p>
                 </div>
-                <h3 class="text-2xl font-semibold text-blue-700 mb-3">معلمون خبراء ومؤهلون</h3>
-                <p class="text-gray-700 leading-relaxed">
-                    استفد من خبرة نخبة من المعلمين المتخصصين في تعليم اللغة العربية، بأساليب مبتكرة.
-                </p>
+                <div class="h-1 w-0 bg-gradient-to-r from-emerald-400 to-teal-600 group-hover:w-full transition-all duration-500 rounded-full"></div>
             </div>
 
             {# بطاقة الميزة 2 #}
-            <div class="bg-white p-8 rounded-lg shadow-md hover:shadow-xl transform hover:-translate-y-2 transition duration-300 ease-in-out">
-                <div class="text-green-500 text-5xl mb-4">
-                    <i class="fas fa-book-open"></i>
+            <div class="group bg-white p-8 lg:p-10 rounded-3xl shadow-lg card-hover border border-gray-100 scroll-fade" style="animation-delay: 0.1s;">
+                <div class="mb-6">
+                    <div class="w-16 h-16 bg-gradient-to-br from-blue-400 to-indigo-600 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+                        <i class="fas fa-book-open text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-4">مناهج متكاملة ومصممة</h3>
+                    <p class="text-gray-600 leading-relaxed">
+                        مناهجنا تغطي جميع المستويات، من المبتدئ إلى المتقدم، مع التركيز على المهارات الأساسية بطريقة تدريجية.
+                    </p>
                 </div>
-                <h3 class="text-2xl font-semibold text-blue-700 mb-3">مناهج متكاملة ومصممة</h3>
-                <p class="text-gray-700 leading-relaxed">
-                    مناهجنا تغطي جميع المستويات، من المبتدئ إلى المتقدم، مع التركيز على المهارات الأساسية.
-                </p>
+                <div class="h-1 w-0 bg-gradient-to-r from-blue-400 to-indigo-600 group-hover:w-full transition-all duration-500 rounded-full"></div>
             </div>
 
             {# بطاقة الميزة 3 #}
-            <div class="bg-white p-8 rounded-lg shadow-md hover:shadow-xl transform hover:-translate-y-2 transition duration-300 ease-in-out">
-                <div class="text-green-500 text-5xl mb-4">
-                    <i class="fas fa-calendar-alt"></i>
+            <div class="group bg-white p-8 lg:p-10 rounded-3xl shadow-lg card-hover border border-gray-100 scroll-fade" style="animation-delay: 0.2s;">
+                <div class="mb-6">
+                    <div class="w-16 h-16 bg-gradient-to-br from-purple-400 to-pink-600 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+                        <i class="fas fa-calendar-alt text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-4">مرونة في التعلم تناسبك</h3>
+                    <p class="text-gray-600 leading-relaxed">
+                        اختر بين الدروس المباشرة التفاعلية، أو استفد من مكتبة ضخمة من الدروس المسجلة بأعلى جودة.
+                    </p>
                 </div>
-                <h3 class="text-2xl font-semibold text-blue-700 mb-3">مرونة في التعلم تناسبك</h3>
-                <p class="text-gray-700 leading-relaxed">
-                    اختر بين الدروس المباشرة التفاعلية، أو استفد من مكتبة ضخمة من الدروس المسجلة.
-                </p>
+                <div class="h-1 w-0 bg-gradient-to-r from-purple-400 to-pink-600 group-hover:w-full transition-all duration-500 rounded-full"></div>
             </div>
-            
-            {# يمكن إضافة بطاقات إضافية هنا (مثل: تتبع التقدم، بيئة مجتمعية، دعم فني) #}
-
         </div>
-        <div class="mt-12">
-            <a href="{% url 'core:about_platform' %}" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-full text-lg shadow-lg transform hover:scale-105 transition duration-300 ease-in-out">
-                اكتشف المزيد عن ميزاتنا <i class="fas fa-arrow-left mr-2"></i>
+        
+        <div class="text-center mt-16 scroll-fade">
+            <a href="{% url 'core:about_platform' %}" class="group inline-flex items-center justify-center px-8 py-4 text-lg font-bold text-white bg-gradient-to-r from-indigo-600 to-purple-600 rounded-full shadow-lg hover:shadow-2xl hover:scale-105 transition-all duration-300 btn-modern">
+                <span class="relative z-10">اكتشف المزيد عن ميزاتنا</span>
+                <i class="fas fa-arrow-left mr-3 group-hover:translate-x-1 transition-transform duration-300"></i>
             </a>
         </div>
     </div>
 </section>
 
 {# 3. How It Works Section - كيف تعمل منصة ضاد؟ #}
-<section class="py-16 md:py-24 bg-white">
-    <div class="container mx-auto px-4 text-center">
-        <h2 class="text-3xl md:text-4xl font-bold text-blue-800 mb-12">
-            خطوات بسيطة لتبدأ رحلتك التعليمية
-        </h2>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-10"> {# زيادة الفجوة بين الخطوات #}
+<section class="py-20 lg:py-32 bg-gradient-to-br from-indigo-50 via-white to-cyan-50">
+    <div class="container mx-auto px-4 lg:px-8">
+        <div class="text-center mb-16 scroll-fade">
+            <h2 class="text-4xl lg:text-5xl font-black text-gray-900 mb-6">
+                خطوات بسيطة لتبدأ رحلتك التعليمية
+            </h2>
+            <p class="text-xl text-gray-600 max-w-3xl mx-auto">ثلاث خطوات سهلة للانطلاق في تعلم العربية مع منصة ضاد</p>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12 relative">
+            {# خط الربط بين الخطوات #}
+            <div class="hidden md:block absolute top-24 left-1/4 right-1/4 h-1 bg-gradient-to-r from-emerald-400 via-blue-500 to-purple-600 rounded-full"></div>
+            
             {# الخطوة 1 #}
-            <div class="flex flex-col items-center text-center p-6 rounded-lg shadow-md border-t-4 border-green-500">
-                <div class="bg-green-100 text-green-700 rounded-full w-20 h-20 flex items-center justify-center text-4xl font-bold mb-6 border-4 border-green-300">
-                    <i class="fas fa-user-plus"></i> {# أيقونة تسجيل #}
+            <div class="relative text-center scroll-fade">
+                <div class="relative z-10 bg-white p-8 lg:p-10 rounded-3xl shadow-xl card-hover border-t-4 border-emerald-500">
+                    <div class="w-20 h-20 bg-gradient-to-br from-emerald-400 to-teal-600 rounded-full mx-auto mb-6 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
+                        <i class="fas fa-user-plus text-white text-3xl"></i>
+                    </div>
+                    <div class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-emerald-500 text-white font-black px-4 py-2 rounded-full text-sm">الخطوة 1</div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-4">سجل مجانًا</h3>
+                    <p class="text-gray-600 leading-relaxed">أنشئ حسابك المجاني في ثوانٍ معدودة. العملية سهلة وسريعة ولا تحتاج سوى بياناتك الأساسية.</p>
                 </div>
-                <h3 class="text-xl font-bold text-blue-700 mb-3">1. سجل مجانًا</h3>
-                <p class="text-gray-700">أنشئ حسابك المجاني في ثوانٍ. العملية سهلة وسريعة.</p>
             </div>
 
             {# الخطوة 2 #}
-            <div class="flex flex-col items-center text-center p-6 rounded-lg shadow-md border-t-4 border-yellow-500">
-                <div class="bg-yellow-100 text-yellow-700 rounded-full w-20 h-20 flex items-center justify-center text-4xl font-bold mb-6 border-4 border-yellow-300">
-                    <i class="fas fa-clipboard-list"></i> {# أيقونة اختبار #}
+            <div class="relative text-center scroll-fade" style="animation-delay: 0.1s;">
+                <div class="relative z-10 bg-white p-8 lg:p-10 rounded-3xl shadow-xl card-hover border-t-4 border-blue-500">
+                    <div class="w-20 h-20 bg-gradient-to-br from-blue-400 to-indigo-600 rounded-full mx-auto mb-6 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
+                        <i class="fas fa-clipboard-list text-white text-3xl"></i>
+                    </div>
+                    <div class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-blue-500 text-white font-black px-4 py-2 rounded-full text-sm">الخطوة 2</div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-4">اختبر مستواك</h3>
+                    <p class="text-gray-600 leading-relaxed">حدد مستواك الحالي في اللغة العربية عبر اختبار تفاعلي سريع ومجاني مصمم خصيصاً لك.</p>
                 </div>
-                <h3 class="text-xl font-bold text-blue-700 mb-3">2. اختبر مستواك</h3>
-                <p class="text-gray-700">حدد مستواك في اللغة العربية عبر اختبار سريع ومجاني.</p>
             </div>
 
             {# الخطوة 3 #}
-            <div class="flex flex-col items-center text-center p-6 rounded-lg shadow-md border-t-4 border-purple-500">
-                <div class="bg-purple-100 text-purple-700 rounded-full w-20 h-20 flex items-center justify-center text-4xl font-bold mb-6 border-4 border-purple-300">
-                    <i class="fas fa-chalkboard"></i> {# أيقونة تعليم #}
+            <div class="relative text-center scroll-fade" style="animation-delay: 0.2s;">
+                <div class="relative z-10 bg-white p-8 lg:p-10 rounded-3xl shadow-xl card-hover border-t-4 border-purple-500">
+                    <div class="w-20 h-20 bg-gradient-to-br from-purple-400 to-pink-600 rounded-full mx-auto mb-6 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
+                        <i class="fas fa-graduation-cap text-white text-3xl"></i>
+                    </div>
+                    <div class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-purple-500 text-white font-black px-4 py-2 rounded-full text-sm">الخطوة 3</div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-4">ابدأ التعلم!</h3>
+                    <p class="text-gray-600 leading-relaxed">انضم إلى دروسك المباشرة التفاعلية أو ابدأ التعلم من مكتبتنا الضخمة من المحتوى المسجل.</p>
                 </div>
-                <h3 class="text-xl font-bold text-blue-700 mb-3">3. ابدأ التعلم!</h3>
-                <p class="text-gray-700">انضم إلى دروسك المباشرة أو ابدأ التعلم من المكتبة المسجلة.</p>
             </div>
         </div>
     </div>
 </section>
 
-{# 4. Testimonials Section - آراء طلابنا (لإثبات الثقة) #}
-<section class="py-16 md:py-24 bg-blue-50">
-    <div class="container mx-auto px-4 text-center">
-        <h2 class="text-3xl md:text-4xl font-bold text-blue-800 mb-12">
-            ماذا يقول طلابنا عن <span class="text-green-600">منصة ضاد</span>؟
-        </h2>
+{# 4. Testimonials Section - آراء طلابنا #}
+<section class="py-20 lg:py-32 bg-gradient-to-br from-slate-900 to-indigo-900 text-white relative overflow-hidden">
+    {# خلفية متحركة #}
+    <div class="absolute inset-0">
+        <div class="absolute top-20 right-10 w-64 h-64 bg-gradient-to-r from-blue-400 to-purple-600 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-float"></div>
+        <div class="absolute bottom-20 left-10 w-80 h-80 bg-gradient-to-r from-teal-400 to-blue-600 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-float" style="animation-delay: -3s;"></div>
+    </div>
+
+    <div class="container mx-auto px-4 lg:px-8 relative z-10">
+        <div class="text-center mb-16 scroll-fade">
+            <h2 class="text-4xl lg:text-5xl font-black mb-6">
+                ماذا يقول طلابنا عن <span class="bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">منصة ضاد</span>؟
+            </h2>
+            <p class="text-xl text-gray-300 max-w-3xl mx-auto">تجارب حقيقية من طلابنا الذين حققوا نجاحات مميزة</p>
+        </div>
+        
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {# شهادة 1 #}
-            <div class="bg-white p-6 rounded-lg shadow-md flex flex-col items-center">
-                <img src="{% static 'images/avatar_female.png' %}" alt="صورة طالبة" class="w-20 h-20 rounded-full object-cover mb-4 border-4 border-green-400">
-                <p class="text-gray-700 text-lg mb-4 italic">
-                    "منصة ضاد غيرت طريقة تعلمي للغة العربية. الدروس ممتعة والمعلمون رائعون!"
+            <div class="bg-white/10 backdrop-blur-lg p-8 rounded-3xl border border-white/20 card-hover scroll-fade">
+                <div class="flex items-center mb-6">
+                    <img src="{% static 'images/avatar_female.png' %}" alt="صورة طالبة" class="w-16 h-16 rounded-full object-cover border-4 border-emerald-400 shadow-lg">
+                    <div class="mr-4">
+                        <p class="font-bold text-lg">سارة أحمد</p>
+                        <p class="text-gray-300 text-sm">طالبة من مصر</p>
+                    </div>
+                </div>
+                <p class="text-gray-200 text-lg mb-6 leading-relaxed italic">
+                    "منصة ضاد غيرت طريقة تعلمي للغة العربية تماماً. الدروس ممتعة والمعلمون رائعون حقاً!"
                 </p>
-                <p class="font-bold text-blue-700">- سارة، طالبة من مصر</p>
-                <div class="text-yellow-400 mt-2">
+                <div class="flex text-yellow-400 text-lg">
                     <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
                 </div>
             </div>
 
             {# شهادة 2 #}
-            <div class="bg-white p-6 rounded-lg shadow-md flex flex-col items-center">
-                <img src="{% static 'images/avatar_male.png' %}" alt="صورة طالب" class="w-20 h-20 rounded-full object-cover mb-4 border-4 border-blue-400">
-                <p class="text-gray-700 text-lg mb-4 italic">
-                    "مرونة الجدول الدراسي ومحتوى المناهج المتميز جعلاني أحرز تقدمًا كبيرًا في وقت قصير."
+            <div class="bg-white/10 backdrop-blur-lg p-8 rounded-3xl border border-white/20 card-hover scroll-fade" style="animation-delay: 0.1s;">
+                <div class="flex items-center mb-6">
+                    <img src="{% static 'images/avatar_male.png' %}" alt="صورة طالب" class="w-16 h-16 rounded-full object-cover border-4 border-blue-400 shadow-lg">
+                    <div class="mr-4">
+                        <p class="font-bold text-lg">أحمد محمد</p>
+                        <p class="text-gray-300 text-sm">طالب من السعودية</p>
+                    </div>
+                </div>
+                <p class="text-gray-200 text-lg mb-6 leading-relaxed italic">
+                    "مرونة الجدول الدراسي ومحتوى المناهج المتميز جعلاني أحرز تقدماً كبيراً في وقت قصير جداً."
                 </p>
-                <p class="font-bold text-blue-700">- أحمد، طالب من السعودية</p>
-                <div class="text-yellow-400 mt-2">
+                <div class="flex text-yellow-400 text-lg">
                     <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i>
                 </div>
             </div>
 
             {# شهادة 3 #}
-            <div class="bg-white p-6 rounded-lg shadow-md flex flex-col items-center">
-                <img src="{% static 'images/avatar_female_2.png' %}" alt="صورة طالبة" class="w-20 h-20 rounded-full object-cover mb-4 border-4 border-green-400">
-                <p class="text-gray-700 text-lg mb-4 italic">
+            <div class="bg-white/10 backdrop-blur-lg p-8 rounded-3xl border border-white/20 card-hover scroll-fade" style="animation-delay: 0.2s;">
+                <div class="flex items-center mb-6">
+                    <img src="{% static 'images/avatar_female_2.png' %}" alt="صورة طالبة" class="w-16 h-16 rounded-full object-cover border-4 border-purple-400 shadow-lg">
+                    <div class="mr-4">
+                        <p class="font-bold text-lg">فاطمة حسن</p>
+                        <p class="text-gray-300 text-sm">طالبة من المغرب</p>
+                    </div>
+                </div>
+                <p class="text-gray-200 text-lg mb-6 leading-relaxed italic">
                     "أنصح بشدة منصة ضاد لكل من يرغب في تعلم العربية الفصحى بطريقة ممتعة وفعالة."
                 </p>
-                <p class="font-bold text-blue-700">- فاطمة، طالبة من المغرب</p>
-                <div class="text-yellow-400 mt-2">
+                <div class="flex text-yellow-400 text-lg">
                     <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
                 </div>
             </div>
@@ -164,18 +351,278 @@
 </section>
 
 {# 5. Final Call to Action - دعوة أخيرة للعمل #}
-<section class="py-16 md:py-24 bg-green-600 text-white text-center">
-    <div class="container mx-auto px-4">
-        <h2 class="text-3xl md:text-4xl font-bold mb-6">
-            لا تفوت الفرصة! ابدأ رحلتك نحو إتقان العربية اليوم!
-        </h2>
-        <p class="text-xl md:text-2xl mb-8 max-w-2xl mx-auto">
-            انضم إلى آلاف الطلاب الذين بدؤوا رحلتهم مع منصة ضاد.
-        </p>
-        <a href="{% url 'register_request' %}" class="inline-block bg-yellow-400 hover:bg-yellow-500 text-blue-800 font-bold py-4 px-10 rounded-full text-xl md:text-2xl shadow-lg transform hover:scale-105 transition duration-300 ease-in-out animate-pulse">
-            سجل الآن مجاناً! <i class="fas fa-arrow-left mr-2"></i>
-        </a>
+<section class="py-20 lg:py-32 bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 text-white text-center relative overflow-hidden">
+    {# تأثيرات بصرية #}
+    <div class="absolute inset-0">
+        <div class="absolute top-10 left-10 w-72 h-72 bg-white/10 rounded-full filter blur-3xl animate-float"></div>
+        <div class="absolute bottom-10 right-10 w-96 h-96 bg-white/10 rounded-full filter blur-3xl animate-float" style="animation-delay: -2s;"></div>
+    </div>
+
+    <div class="container mx-auto px-4 lg:px-8 relative z-10">
+        <div class="max-w-4xl mx-auto scroll-fade">
+            <h2 class="text-4xl lg:text-6xl font-black mb-8 leading-tight">
+                لا تفوت الفرصة! 
+                <br class="hidden sm:block">
+                ابدأ رحلتك نحو إتقان العربية اليوم!
+            </h2>
+            <p class="text-xl lg:text-2xl mb-12 text-gray-100 leading-relaxed">
+                انضم إلى آلاف الطلاب الذين بدؤوا رحلتهم التعليمية الناجحة مع منصة ضاد
+            </p>
+            <div class="space-y-4">
+                <a href="{% url 'register_request' %}" class="group inline-flex items-center justify-center px-12 py-5 text-xl lg:text-2xl font-black text-emerald-700 bg-gradient-to-r from-yellow-300 to-orange-400 rounded-full shadow-2xl hover:shadow-3xl transform hover:scale-105 transition-all duration-300 btn-modern animate-pulse">
+                    <span class="relative z-10">سجل الآن مجاناً!</span>
+                    <i class="fas fa-rocket mr-4 group-hover:translate-x-1 transition-transform duration-300"></i>
+                </a>
+                <p class="text-sm text-gray-200">✨ مجاني تماماً • بدون التزامات مالية • ابدأ فوراً</p>
+            </div>
+        </div>
     </div>
 </section>
+
+{# إضافة JavaScript للتفاعلية والأنيميشن عند التمرير #}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // تفعيل الأنيميشن عند التمرير
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver(function(entries) {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+            }
+        });
+    }, observerOptions);
+
+    // مراقبة جميع العناصر التي تحتوي على كلاس scroll-fade
+    document.querySelectorAll('.scroll-fade').forEach(el => {
+        observer.observe(el);
+    });
+
+    // تحسين الأداء: تأخير تحميل الصور
+    const imageObserver = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const img = entry.target;
+                img.src = img.dataset.src;
+                img.classList.remove('opacity-0');
+                imageObserver.unobserve(img);
+            }
+        });
+    });
+
+    document.querySelectorAll('img[data-src]').forEach(img => {
+        img.classList.add('opacity-0', 'transition-opacity', 'duration-300');
+        imageObserver.observe(img);
+    });
+
+    // تأثير تمرير سلس للروابط الداخلية
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        });
+    });
+
+    // تأثير تفاعلي للأزرار
+    document.querySelectorAll('.btn-modern').forEach(btn => {
+        btn.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-2px) scale(1.05)';
+        });
+        
+        btn.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0) scale(1)';
+        });
+    });
+
+    // تأثير اهتزاز خفيف للأيقونات عند التمرير
+    document.querySelectorAll('.fas').forEach(icon => {
+        icon.addEventListener('mouseenter', function() {
+            this.style.animation = 'pulse 0.5s ease-in-out';
+        });
+        
+        icon.addEventListener('animationend', function() {
+            this.style.animation = '';
+        });
+    });
+
+    // تحسين الأداء: تقليل تأثير scroll events
+    let ticking = false;
+    
+    function updateScrollEffects() {
+        const scrolled = window.pageYOffset;
+        const parallaxElements = document.querySelectorAll('.animate-float');
+        
+        parallaxElements.forEach((el, index) => {
+            const speed = 0.5 + (index * 0.1);
+            el.style.transform = `translateY(${scrolled * speed}px)`;
+        });
+        
+        ticking = false;
+    }
+    
+    window.addEventListener('scroll', function() {
+        if (!ticking) {
+            requestAnimationFrame(updateScrollEffects);
+            ticking = true;
+        }
+    });
+
+    // إضافة تأثيرات تفاعلية للبطاقات
+    document.querySelectorAll('.card-hover').forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.boxShadow = '0 25px 50px -12px rgba(0, 0, 0, 0.25)';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.boxShadow = '';
+        });
+    });
+});
+
+// تحميل الخطوط بطريقة محسنة
+if ('fonts' in document) {
+    document.fonts.ready.then(() => {
+        document.body.classList.add('fonts-loaded');
+    });
+}
+
+// تحسين الأداء: preload للصور المهمة
+const preloadImages = [
+    '{% static "images/avatar_female.png" %}',
+    '{% static "images/avatar_male.png" %}',
+    '{% static "images/avatar_female_2.png" %}'
+];
+
+preloadImages.forEach(src => {
+    const link = document.createElement('link');
+    link.rel = 'preload';
+    link.as = 'image';
+    link.href = src;
+    document.head.appendChild(link);
+});
+</script>
+
+<!-- تحسين SEO والأداء -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "EducationalOrganization",
+  "name": "منصة ضاد",
+  "description": "منصة تعليمية متخصصة في تعليم اللغة العربية بأساليب حديثة وتفاعلية",
+  "url": "{{ request.build_absolute_uri }}",
+  "logo": "{% static 'images/logo.png' %}",
+  "contactPoint": {
+    "@type": "ContactPoint",
+    "contactType": "customer service",
+    "availableLanguage": "Arabic"
+  },
+  "offers": {
+    "@type": "Offer",
+    "name": "دورات تعليم اللغة العربية",
+    "description": "دورات مجانية ومدفوعة لتعليم اللغة العربية لجميع المستويات"
+  }
+}
+</script>
+
+<!-- تحسين الأداء: CSS Critical -->
+<style>
+    /* تحسين الخطوط والأداء */
+    .fonts-loaded h1,
+    .fonts-loaded h2,
+    .fonts-loaded h3 {
+        font-display: swap;
+    }
+    
+    /* تحسين CLS (Cumulative Layout Shift) */
+    img {
+        height: auto;
+        max-width: 100%;
+    }
+    
+    /* تحسين الأداء للأنيميشن */
+    @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+        }
+    }
+    
+    /* تحسين الألوان للوضع المظلم */
+    @media (prefers-color-scheme: dark) {
+        .bg-gray-50 {
+            background-color: #1f2937;
+        }
+        
+        .text-gray-900 {
+            color: #292929ff;
+        }
+        
+        .text-gray-600 {
+            color: #444444ff;
+        }
+    }
+    
+    /* تحسين إمكانية الوصول */
+    .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+    }
+    
+    /* تحسين التباين للنصوص */
+    .high-contrast {
+        filter: contrast(150%);
+    }
+    
+    /* تحسين القابلية للقراءة */
+    p, li {
+        line-height: 1.7;
+        font-size: 1.1rem;
+    }
+    
+    /* تحسين التركيز للوحة المفاتيح */
+    button:focus,
+    a:focus {
+        outline: 3px solid #3b82f6;
+        outline-offset: 2px;
+    }
+    
+    /* تحسين الأداء للشاشات الكبيرة */
+    @media (min-width: 1920px) {
+        .container {
+            max-width: 1400px;
+        }
+    }
+    
+    /* تحسين للطباعة */
+    @media print {
+        .no-print {
+            display: none !important;
+        }
+        
+        * {
+            background: white !important;
+            color: black !important;
+        }
+    }
+</style>
 
 {% endblock %}

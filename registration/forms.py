@@ -1,19 +1,11 @@
 # registration/forms.py
 from django import forms
-from django.contrib.auth.hashers import make_password
+# from django.contrib.auth.hashers import make_password # لم نعد بحاجة إليها إذا أزلنا حقول كلمة المرور
 from .models import RegistrationRequest
 
 class RegistrationRequestForm(forms.ModelForm):
-    password = forms.CharField(
-        label="كلمة المرور",
-        widget=forms.PasswordInput(attrs={'class': 'form-input'}),
-        min_length=8,
-        help_text="يجب أن تتكون كلمة المرور من 8 أحرف على الأقل."
-    )
-    password_confirm = forms.CharField(
-        label="تأكيد كلمة المرور",
-        widget=forms.PasswordInput(attrs={'class': 'form-input'})
-    )
+    # تم إزالة حقلي 'password' و 'password_confirm' من هنا لأن النموذج أصبح لـ "رغبة بالانضمام" فقط
+    # ولن يطلب من المستخدم إدخال كلمة مرور مباشرة في هذه المرحلة.
 
     class Meta:
         model = RegistrationRequest
@@ -31,9 +23,7 @@ class RegistrationRequestForm(forms.ModelForm):
             'native_language',
             'email',
             'whatsapp_number',
-            'preferred_payment_method', # <--- إضافة هذا
-            'password',
-            'password_confirm'
+            'preferred_payment_method',
         ]
         widgets = {
             'date_of_birth': forms.DateInput(attrs={'type': 'date', 'class': 'form-input'}),
@@ -49,7 +39,7 @@ class RegistrationRequestForm(forms.ModelForm):
             'native_language': forms.TextInput(attrs={'class': 'form-input'}),
             'email': forms.EmailInput(attrs={'class': 'form-input'}),
             'whatsapp_number': forms.TextInput(attrs={'class': 'form-input'}),
-            'preferred_payment_method': forms.Select(attrs={'class': 'form-select'}), # <--- إضافة هذا
+            'preferred_payment_method': forms.Select(attrs={'class': 'form-select'}),
         }
         labels = {
             'full_name': 'الاسم الكامل',
@@ -65,18 +55,15 @@ class RegistrationRequestForm(forms.ModelForm):
             'native_language': 'اللغة الأم',
             'email': 'البريد الإلكتروني',
             'whatsapp_number': 'رقم واتساب للتواصل (مع رمز الدولة)',
-            'preferred_payment_method': 'طريقة الدفع المفضلة', # <--- إضافة هذا
+            'preferred_payment_method': 'طريقة الدفع المفضلة',
         }
 
     def clean(self):
         cleaned_data = super().clean()
-        password = cleaned_data.get('password')
-        password_confirm = cleaned_data.get('password_confirm')
+        # تم إزالة التحقق من 'password' و 'password_confirm'
+        
         whatsapp_number = cleaned_data.get('whatsapp_number')
 
-        if password and password_confirm and password != password_confirm:
-            self.add_error('password_confirm', "كلمة المرور وتأكيدها غير متطابقين.")
-        
         if whatsapp_number:
             cleaned_whatsapp = whatsapp_number.replace(' ', '').replace('-', '')
             if not cleaned_whatsapp.isdigit():
@@ -86,9 +73,15 @@ class RegistrationRequestForm(forms.ModelForm):
         return cleaned_data
     
     def save(self, commit=True):
+        # لم نعد بحاجة لتعيين password_hash هنا لأن حقول كلمة المرور قد أزيلت
         registration_request = super().save(commit=False)
-        registration_request.password_hash = make_password(self.cleaned_data['password'])
         
+        # إذا كنت تريد تعيين كلمة مرور افتراضية أو تركها فارغة ليتم تعيينها لاحقًا
+        # على سبيل المثال، يمكنك تركها فارغة هنا، ثم يتم التعامل معها في الـ view
+        # أو عند الموافقة على الطلب في لوحة التحكم.
+        # تأكد أن حقل password_hash في موديل RegistrationRequest يسمح بالقيمة الفارغة (nullable).
+        # مثال: registration_request.password_hash = "" أو None
+
         if commit:
             registration_request.save()
         return registration_request

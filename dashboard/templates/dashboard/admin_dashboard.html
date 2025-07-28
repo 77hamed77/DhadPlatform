@@ -1,0 +1,492 @@
+{# dashboard/admin_dashboard.html #}
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}لوحة تحكم الإدارة - منصة ضاد{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-100 p-6 md:p-10 text-right" dir="rtl">
+    <div class="max-w-7xl mx-auto">
+        {# رسائل Django (ستظهر في أعلى الصفحة بفضل وضعها في base.html أو في messages-container) #}
+        {% comment %}
+        هذا الجزء تم نقله إلى messages-container في نهاية الملف ليكون مركزياً ومتحركاً
+        {% endcomment %}
+
+        <h1 class="text-3xl font-bold text-gray-800 mb-6">لوحة تحكم الإدارة</h1>
+
+        {# قسم الإحصائيات #}
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="relative bg-white p-6 rounded-lg shadow-md border-r-4 border-blue-500 overflow-hidden">
+                <h2 class="text-xl font-semibold text-gray-700 mb-2">إجمالي المستخدمين</h2>
+                <p class="text-4xl font-bold text-blue-600" id="total-users-count">{{ total_users }}</p>
+                <i class="fas fa-users text-blue-400 text-opacity-20 text-5xl absolute -left-2 top-1/2 -translate-y-1/2"></i>
+            </div>
+            <div class="relative bg-white p-6 rounded-lg shadow-md border-r-4 border-yellow-500 overflow-hidden">
+                <h2 class="text-xl font-semibold text-gray-700 mb-2">طلبات معلقة</h2>
+                <p class="text-4xl font-bold text-yellow-600" id="pending-requests-count">{{ pending_requests }}</p>
+                <i class="fas fa-hourglass-half text-yellow-400 text-opacity-20 text-5xl absolute -left-2 top-1/2 -translate-y-1/2"></i>
+            </div>
+            <div class="relative bg-white p-6 rounded-lg shadow-md border-r-4 border-green-500 overflow-hidden">
+                <h2 class="text-xl font-semibold text-gray-700 mb-2">طلبات موافق عليها</h2>
+                <p class="text-4xl font-bold text-green-600" id="approved-requests-count">{{ approved_requests }}</p>
+                <i class="fas fa-check-circle text-green-400 text-opacity-20 text-5xl absolute -left-2 top-1/2 -translate-y-1/2"></i>
+            </div>
+        </div>
+
+        {# قسم المخططات البيانية #}
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <h2 class="text-xl font-semibold text-gray-700 mb-4 text-center">توزيع المستخدمين حسب الجنس</h2>
+                <canvas id="genderChart"></canvas>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <h2 class="text-xl font-semibold text-gray-700 mb-4 text-center">حالة طلبات التسجيل</h2>
+                <canvas id="statusChart"></canvas>
+            </div>
+        </div>
+
+        {# جدول طلبات التسجيل الأخيرة #}
+        <div class="bg-white p-6 rounded-lg shadow-md mb-8">
+            <h2 class="text-xl font-semibold text-gray-700 mb-4">طلبات التسجيل الأخيرة</h2>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                الاسم الكامل
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                البريد الإلكتروني
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                رقم واتساب
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                الدولة
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                المستوى الدراسي
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                طريقة الدفع المفضلة
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                حالة الطلب
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                تاريخ الطلب
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                الإجراءات
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for request_item in recent_requests %}
+                        <tr id="request-row-{{ request_item.id }}">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                {{ request_item.full_name }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                {{ request_item.email }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                {{ request_item.whatsapp_number }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                {{ request_item.country }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                {{ request_item.study_level }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                {{ request_item.get_preferred_payment_method_display }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                <span id="status-{{ request_item.id }}" class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
+                                    {% if request_item.status == 'pending' %}bg-yellow-100 text-yellow-800
+                                    {% elif request_item.status == 'approved' %}bg-green-100 text-green-800
+                                    {% elif request_item.status == 'rejected' %}bg-red-100 text-red-800
+                                    {% endif %}">
+                                    {{ request_item.get_status_display }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                {{ request_item.created_at|date:"Y-m-d H:i" }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium" id="actions-{{ request_item.id }}">
+                                {% if request_item.status == 'pending' %}
+                                    <button type="button"
+                                            data-request-id="{{ request_item.id }}"
+                                            data-full-name="{{ request_item.full_name }}"
+                                            class="action-button bg-green-500 hover:bg-green-600 text-white font-bold py-1 px-3 rounded text-xs transition duration-200">
+                                        موافقة
+                                    </button>
+                                    <button type="button"
+                                            data-request-id="{{ request_item.id }}"
+                                            data-full-name="{{ request_item.full_name }}"
+                                            class="action-button bg-red-500 hover:bg-red-600 text-white font-bold py-1 px-3 rounded text-xs mr-2 transition duration-200">
+                                        رفض
+                                    </button>
+                                {% else %}
+                                    <span class="text-gray-500 text-xs">تمت المعالجة</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="9" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
+                                لا توجد طلبات تسجيل لعرضها.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            {# Pagination Controls #}
+            <div class="mt-4 flex justify-center">
+                <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                    {% if recent_requests.has_previous %}
+                        <a href="?page={{ recent_requests.previous_page_number }}" class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                            <span class="sr-only">Previous</span>
+                            <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                            </svg>
+                        </a>
+                    {% endif %}
+
+                    {% for i in recent_requests.paginator.page_range %}
+                        {% if recent_requests.number == i %}
+                            <a href="?page={{ i }}" aria-current="page" class="z-10 bg-blue-50 border-blue-500 text-blue-600 relative inline-flex items-center px-4 py-2 border text-sm font-medium">
+                                {{ i }}
+                            </a>
+                        {% else %}
+                            <a href="?page={{ i }}" class="bg-white border-gray-300 text-gray-700 hover:bg-gray-50 relative inline-flex items-center px-4 py-2 border text-sm font-medium">
+                                {{ i }}
+                            </a>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if recent_requests.has_next %}
+                        <a href="?page={{ recent_requests.next_page_number }}" class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                            <span class="sr-only">Next</span>
+                            <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+                            </svg>
+                        </a>
+                    {% endif %}
+                </nav>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="approveModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md mx-4" dir="rtl">
+        <h3 class="text-lg font-bold text-gray-900 mb-4">الموافقة على طلب التسجيل</h3>
+        <p class="text-gray-700 mb-4">هل أنت متأكد أنك تريد الموافقة على طلب التسجيل الخاص بـ <strong id="approve-modal-name"></strong>؟</p>
+        
+        <div class="mb-4">
+            <label for="usernameInput" class="block text-sm font-medium text-gray-700 mb-1">اسم المستخدم (يجب أن يكون فريداً وباللغة الإنجليزية):</label>
+            <input type="text" id="usernameInput" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" placeholder="أدخل اسم المستخدم">
+            <p id="usernameError" class="text-red-500 text-sm mt-1 hidden">اسم المستخدم مطلوب ويجب أن يكون فريداً وباللغة الإنجليزية.</p>
+        </div>
+
+        <div class="flex justify-end gap-3">
+            <button type="button" onclick="closeApproveModal()" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                إلغاء
+            </button>
+            <button type="button" id="confirmApproveButton" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                موافق
+            </button>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_body %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js/dist/chart.umd.js"></script>
+<script>
+    // الحصول على رمز CSRF Token من الكوكيز
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    const csrftoken = getCookie('csrftoken');
+
+    let currentRequestId = null; // لتخزين معرف الطلب الحالي لـ Modal الموافقة
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // تحديث رسائل Django (لأن AJAX لا يعيد تحميل الصفحة)
+        function showMessage(type, text) {
+            const messagesContainer = document.querySelector('.messages-container');
+            if (!messagesContainer) {
+                console.warn("Messages container not found. Messages will be logged to console instead.");
+                alert(text); // fallback to alert if no container
+                return;
+            }
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `p-4 rounded-lg text-sm text-white mb-2 shadow-md fade-in flex items-center`;
+            
+            let iconClass = '';
+            if (type === 'success') {
+                messageDiv.classList.add('bg-green-500');
+                iconClass = 'fa-check-circle';
+            } else if (type === 'error') {
+                messageDiv.classList.add('bg-red-500');
+                iconClass = 'fa-exclamation-circle';
+            } else if (type === 'warning') {
+                messageDiv.classList.add('bg-yellow-500');
+                iconClass = 'fa-exclamation-triangle';
+            } else if (type === 'info') {
+                messageDiv.classList.add('bg-blue-500');
+                iconClass = 'fa-info-circle';
+            }
+            
+            messageDiv.innerHTML = `<i class="fas ${iconClass} ml-3 text-xl"></i><span class="font-medium text-base">${text}</span>`;
+            messagesContainer.prepend(messageDiv);
+            
+            setTimeout(() => {
+                messageDiv.remove();
+            }, 5000); // إزالة بعد 5 ثوانٍ
+        }
+
+        // دالة لعرض modal الموافقة
+        window.showApproveModal = function(requestId, fullName) {
+            currentRequestId = requestId;
+            document.getElementById('approve-modal-name').textContent = fullName;
+            document.getElementById('usernameInput').value = ''; // مسح قيمة اسم المستخدم السابقة
+            document.getElementById('usernameError').classList.add('hidden'); // إخفاء رسالة الخطأ
+            document.getElementById('approveModal').classList.remove('hidden');
+        };
+
+        // دالة لإغلاق modal الموافقة
+        window.closeApproveModal = function() {
+            document.getElementById('approveModal').classList.add('hidden');
+            currentRequestId = null;
+        };
+
+        // معالجة النقر على زر "موافق" داخل الـ Modal
+        document.getElementById('confirmApproveButton').addEventListener('click', function() {
+            const username = document.getElementById('usernameInput').value.trim();
+            if (!username) {
+                document.getElementById('usernameError').classList.remove('hidden');
+                return;
+            }
+            // إخفاء الخطأ إذا تم إدخال اسم مستخدم
+            document.getElementById('usernameError').classList.add('hidden');
+
+            const url = `{% url "dashboard:approve_request" 0 %}`.replace('0', currentRequestId);
+
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrftoken,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ username: username }) // إرسال اسم المستخدم مع الطلب
+            })
+            .then(response => {
+                const contentType = response.headers.get('content-type');
+                if (contentType && contentType.indexOf('application/json') !== -1) {
+                    return response.json();
+                } else {
+                    return response.text().then(text => { throw new Error('Server did not return JSON: ' + text); });
+                }
+            })
+            .then(data => {
+                if (data.status === 'success' || data.status === 'warning') {
+                    const statusSpan = document.getElementById(`status-${currentRequestId}`);
+                    const actionButtonsContainer = document.getElementById(`actions-${currentRequestId}`);
+
+                    if (statusSpan) {
+                        statusSpan.textContent = 'تمت الموافقة';
+                        statusSpan.className = 'px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800';
+                    }
+                    if (actionButtonsContainer) {
+                        actionButtonsContainer.innerHTML = `<span class="text-green-600 text-xs">تمت الموافقة</span>`;
+                    }
+                    showMessage(data.status, data.message);
+                    updateDashboardStats(); // تحديث العدادات والمخططات
+                    closeApproveModal(); // إغلاق المودال
+                } else {
+                    showMessage('error', data.message || 'حدث خطأ غير معروف.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showMessage('error', 'حدث خطأ أثناء معالجة طلبك: ' + error.message);
+            });
+        });
+
+        // معالجة النقر على زر "رفض" مباشرة (بدون Modal)
+        window.rejectRegistrationRequest = function(requestId, fullName) {
+            if (!confirm(`هل أنت متأكد أنك تريد رفض طلب التسجيل الخاص بـ ${fullName}؟`)) {
+                return;
+            }
+
+            const url = `{% url "dashboard:reject_request" 0 %}`.replace('0', requestId);
+
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrftoken,
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => {
+                const contentType = response.headers.get('content-type');
+                if (contentType && contentType.indexOf('application/json') !== -1) {
+                    return response.json();
+                } else {
+                    return response.text().then(text => { throw new Error('Server did not return JSON: ' + text); });
+                }
+            })
+            .then(data => {
+                if (data.status === 'success' || data.status === 'warning') {
+                    const statusSpan = document.getElementById(`status-${requestId}`);
+                    const actionButtonsContainer = document.getElementById(`actions-${requestId}`);
+
+                    if (statusSpan) {
+                        statusSpan.textContent = 'تم الرفض';
+                        statusSpan.className = 'px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800';
+                    }
+                    if (actionButtonsContainer) {
+                        actionButtonsContainer.innerHTML = `<span class="text-red-600 text-xs">تم الرفض</span>`;
+                    }
+                    showMessage(data.status, data.message);
+                    updateDashboardStats(); // تحديث العدادات والمخططات
+                } else {
+                    showMessage('error', data.message || 'حدث خطأ غير معروف.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showMessage('error', 'حدث خطأ أثناء معالجة طلبك: ' + error.message);
+            });
+        };
+
+        // جلب بيانات المخططات عند تحميل الصفحة
+        fetch('{% url "dashboard:user_data_api" %}')
+            .then(response => response.json())
+            .then(data => {
+                // تخزين مثيلات المخططات في المتغيرات العامة لتدميرها لاحقًا
+                window.genderChartInstance = createGenderChart(data.gender_counts);
+                window.statusChartInstance = createStatusChart(data.status_counts);
+            })
+            .catch(error => console.error('Error fetching initial chart data:', error));
+
+        // دالة لإنشاء مخطط توزيع المستخدمين حسب الجنس
+        function createGenderChart(gender_counts) {
+            const genderCtx = document.getElementById('genderChart').getContext('2d');
+            return new Chart(genderCtx, {
+                type: 'pie',
+                data: {
+                    labels: ['ذكور', 'إناث'],
+                    datasets: [{
+                        data: [gender_counts.male, gender_counts.female],
+                        backgroundColor: ['rgba(54, 162, 235, 0.8)', 'rgba(255, 99, 132, 0.8)'],
+                        borderColor: ['rgba(54, 162, 235, 1)', 'rgba(255, 99, 132, 1)'],
+                        borderWidth: 1
+                    }]
+                },
+                options: { 
+                    responsive: true, 
+                    plugins: { 
+                        legend: { position: 'top' }, 
+                        title: { display: false } 
+                    },
+                    maintainAspectRatio: false // للسماح بتعديل الحجم بناءً على الحاوية
+                }
+            });
+        }
+
+        // دالة لإنشاء مخطط حالة طلبات التسجيل
+        function createStatusChart(status_counts) {
+            const statusCtx = document.getElementById('statusChart').getContext('2d');
+            return new Chart(statusCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['قيد الانتظار', 'تمت الموافقة', 'تم الرفض'],
+                    datasets: [{
+                        data: [status_counts.pending, status_counts.approved, status_counts.rejected],
+                        backgroundColor: ['rgba(255, 206, 86, 0.8)', 'rgba(75, 192, 192, 0.8)', 'rgba(255, 99, 132, 0.8)'],
+                        borderColor: ['rgba(255, 206, 86, 1)', 'rgba(75, 192, 192, 1)', 'rgba(255, 99, 132, 1)'],
+                        borderWidth: 1
+                    }]
+                },
+                options: { 
+                    responsive: true, 
+                    plugins: { 
+                        legend: { position: 'top' }, 
+                        title: { display: false } 
+                    },
+                    maintainAspectRatio: false // للسماح بتعديل الحجم بناءً على الحاوية
+                }
+            });
+        }
+
+        // دالة لتحديث العدادات والمخططات بعد إجراء
+        function updateDashboardStats() {
+            fetch('{% url "dashboard:user_data_api" %}')
+                .then(response => response.json())
+                .then(data => {
+                    // تحديث العدادات
+                    document.getElementById('total-users-count').textContent = data.total_users || 0;
+                    document.getElementById('pending-requests-count').textContent = data.status_counts.pending || 0;
+                    document.getElementById('approved-requests-count').textContent = data.status_counts.approved || 0;
+
+                    // تدمير المخططات القديمة قبل إنشاء الجديدة
+                    if (window.genderChartInstance) window.genderChartInstance.destroy();
+                    if (window.statusChartInstance) window.statusChartInstance.destroy();
+
+                    // إنشاء مخططات جديدة بالبيانات المحدثة
+                    window.genderChartInstance = createGenderChart(data.gender_counts);
+                    window.statusChartInstance = createStatusChart(data.status_counts);
+                })
+                .catch(error => console.error('Error updating dashboard stats:', error));
+        }
+    });
+</script>
+
+{# مكان لرسائل الفلاش (يمكن وضعه في base.html ليعمل في كل الصفحات) #}
+<div class="messages-container fixed top-4 right-1/2 translate-x-1/2 w-full max-w-sm z-50 flex flex-col items-end">
+    {% if messages %}
+        {% for message in messages %}
+            <div class="p-4 rounded-lg text-sm text-white mb-2 shadow-md fade-in flex items-center
+                {% if message.tags == 'success' %}bg-green-500
+                {% elif message.tags == 'error' %}bg-red-500
+                {% elif message.tags == 'warning' %}bg-yellow-500
+                {% elif message.tags == 'info' %}bg-blue-500
+                {% else %}bg-gray-500{% endif %}" role="alert">
+                <i class="fas {% if message.tags == 'success' %}fa-check-circle{% elif message.tags == 'error' %}fa-exclamation-circle{% elif message.tags == 'warning' %}fa-exclamation-triangle{% else %}fa-info-circle{% endif %} ml-3 text-xl"></i>
+                <span class="font-medium text-base">{{ message }}</span>
+            </div>
+        {% endfor %}
+    {% endif %}
+</div>
+
+{# CSS للرسائل المتحركة #}
+<style>
+    .fade-in {
+        animation: fadeIn 0.5s ease-in-out forwards;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
+{% endblock %}

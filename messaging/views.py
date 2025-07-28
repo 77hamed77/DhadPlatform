@@ -1,37 +1,30 @@
-from django.shortcuts import render, get_object_or_404, redirect
+# messaging/views.py
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from django.db.models import Q # لاستخدام عمليات OR في الاستعلامات
+from django.db.models import Q # مهم جداً لاستخدام OR في الفلترة
 from .models import Conversation, Message
-from .forms import MessageForm # سننشئ هذا النموذج لاحقاً
-from django.contrib import messages
-from core.models import User # استيراد نموذج المستخدم
-from django.http import JsonResponse, HttpResponse # تأكد من استيراد JsonResponse
-from django.core import serializers # لاستخدام serializing Objects to JSON
-from django.utils import timezone
-import json # لإدارة JSON في الـ AJAX
+from .forms import MessageForm
+from core.models import User # تأكد من أن هذا الاستيراد صحيح لنموذج المستخدم الخاص بك
 
 @login_required
 def inbox(request):
-    # جلب جميع المحادثات التي يكون المستخدم الحالي طرفاً فيها
-    # وترتيبها حسب آخر تحديث
     conversations = Conversation.objects.filter(participants=request.user).order_by('-updated_at')
-
+    for conv in conversations:
+        conv.other_participant = conv.get_other_participant(request.user)
     context = {
-        'conversations': conversations
+        'conversations': conversations,
     }
     return render(request, 'messaging/inbox.html', context)
 
 @login_required
 def conversation_detail(request, conversation_id):
-    # جلب المحادثة المحددة، أو إظهار خطأ 404 إذا لم يتم العثور عليها
-    # والتأكد أن المستخدم الحالي هو أحد المشاركين فيها
     conversation = get_object_or_404(Conversation, id=conversation_id)
-    if not request.user in conversation.participants.all():
-        # إذا لم يكن المستخدم مشاركاً في المحادثة، أعد توجيهه أو أظهر خطأ
-        messages.error(request, 'لا تملك صلاحية الوصول لهذه المحادثة.')
-        return redirect('inbox')
+    if request.user not in conversation.participants.all():
+        return redirect('messaging:inbox')
 
-    messages_in_conversation = Message.objects.filter(conversation=conversation).order_by('timestamp')
+    messages = conversation.messages.all().order_by('timestamp')
+    form = MessageForm()
+    other_user = conversation.get_other_participant(request.user)
 
     if request.method == 'POST':
         form = MessageForm(request.POST)
@@ -40,110 +33,68 @@ def conversation_detail(request, conversation_id):
             message.conversation = conversation
             message.sender = request.user
             message.save()
-
-            # تحديث تاريخ آخر تحديث للمحادثة
-            conversation.updated_at = message.timestamp
-            conversation.save()
-
-            # يمكن استخدام JsonResponse هنا إذا أردت تحديث الدردشة عبر AJAX
-            # return JsonResponse({'status': 'success', 'message': message.content})
-            return redirect('conversation_detail', conversation_id=conversation.id) # إعادة توجيه لتحديث الصفحة
-        else:
-            messages.error(request, 'لا يمكن إرسال الرسالة. يرجى مراجعة المحتوى.')
-    else:
-        form = MessageForm() # نموذج فارغ لرسالة جديدة
+            return redirect('messaging:conversation_detail', conversation_id=conversation.id)
 
     context = {
         'conversation': conversation,
-        'messages_in_conversation': messages_in_conversation,
+        'conversation_messages': messages,
         'form': form,
-        'other_participant': conversation.get_other_participant(request.user) # لتسهيل عرض اسم الطرف الآخر
+        'other_user': other_user,
     }
     return render(request, 'messaging/conversation_detail.html', context)
-
-# يمكن إضافة واجهة (View) لبدء محادثة جديدة هنا لاحقاً
 
 @login_required
 def start_or_get_conversation(request, other_user_id):
     other_user = get_object_or_404(User, id=other_user_id)
-
     if request.user == other_user:
-        messages.error(request, "لا يمكنك بدء محادثة مع نفسك.")
-        return redirect('dashboard')
+        return redirect('messaging:inbox')
 
     conversation = Conversation.objects.filter(
-        Q(participant1=request.user, participant2=other_user) |
-        Q(participant1=other_user, participant2=request.user)
+        conversation_type='private',
+        participants=request.user
+    ).filter(
+        participants=other_user
     ).first()
 
     if not conversation:
-        conversation = Conversation.objects.create(participant1=request.user, participant2=other_user)
+        conversation = Conversation.objects.create(conversation_type='private')
+        conversation.participants.add(request.user, other_user)
+        conversation.save()
 
-    # --------------------------------------------------------------------------
-    # منطق جلب الرسائل الجديدة لطلبات الـ AJAX (Polling)
-    # --------------------------------------------------------------------------
-    if request.headers.get('x-requested-with') == 'XMLHttpRequest' and 'last_message_id' in request.GET:
-        last_message_id = request.GET.get('last_message_id')
-        try:
-            new_messages = Message.objects.filter(
-                conversation=conversation,
-                id__gt=last_message_id
-            ).order_by('timestamp')
+    return redirect('messaging:conversation_detail', conversation_id=conversation.id)
 
-            messages_data = []
-            for msg in new_messages:
-                messages_data.append({
-                    'id': msg.id,
-                    'sender_username': msg.sender.username,
-                    'sender_full_name': msg.sender.full_name,
-                    'content': msg.content,
-                    'timestamp': msg.timestamp.strftime("%Y-%m-%d %H:%M:%S"),
-                    'is_from_me': msg.sender == request.user
-                })
+@login_required
+def new_conversation_selection(request):
+    """
+    يعرض قائمة بالمعلمين والمسؤولين الذين يمكن للطالب بدء محادثة معهم.
+    """
+    # جلب جميع المعلمين والمسؤولين
+    # استبعاد المستخدم الحالي من القائمة لمنعه من الدردشة مع نفسه
+    # وفلترة الأدوار
+    # ******** التعديل الرئيسي هنا: استخدام 'first_name', 'last_name' للترتيب ********
+    teachers = User.objects.filter(role='teacher').exclude(id=request.user.id).order_by('first_name', 'last_name', 'username')
+    admins = User.objects.filter(role='admin').exclude(id=request.user.id).order_by('first_name', 'last_name', 'username')
 
-            return JsonResponse({'messages': messages_data})
-
-        except ValueError:
-            return JsonResponse({'error': 'Invalid last_message_id'}, status=400)
-
-    # --------------------------------------------------------------------------
-    # منطق إرسال رسالة (POST)
-    # --------------------------------------------------------------------------
-    if request.method == 'POST':
-        form = MessageForm(request.POST)
-        if form.is_valid():
-            message = form.save(commit=False)
-            message.conversation = conversation
-            message.sender = request.user
-            message.save()
-
-            # إذا كان الطلب AJAX، أرجع JsonResponse بدلاً من إعادة التوجيه
-            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-                return JsonResponse({
-                    'status': 'success',
-                    'message': {
-                        'id': message.id,
-                        'sender_username': message.sender.username,
-                        'sender_full_name': message.sender.full_name,
-                        'content': message.content,
-                        'timestamp': message.timestamp.strftime("%Y-%m-%d %H:%M:%S"),
-                        'is_from_me': message.sender == request.user
-                    }
-                })
-            # إذا لم يكن الطلب AJAX، قم بإعادة التوجيه كما كان
-            return redirect('start_or_get_conversation', other_user_id=other_user_id)
-        else:
-            # إذا كان هناك خطأ في النموذج وطلب AJAX، أرجع JsonResponse بالخطأ
-            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-                return JsonResponse({'status': 'error', 'errors': form.errors}, status=400)
-
-    # جلب جميع الرسائل للمحادثة (للتحميل الأولي للصفحة)
-    messages = Message.objects.filter(conversation=conversation).order_by('timestamp')
+    search_query = request.GET.get('q')
+    if search_query:
+        # تطبيق البحث على كل من المعلمين والمسؤولين بشكل منفصل
+        # ******** التعديل الرئيسي هنا: استخدام 'first_name', 'last_name' في Q object للبحث ********
+        teachers = teachers.filter(
+            Q(first_name__icontains=search_query) |
+            Q(last_name__icontains=search_query) |
+            Q(username__icontains=search_query) |
+            Q(email__icontains=search_query)
+        )
+        admins = admins.filter(
+            Q(first_name__icontains=search_query) |
+            Q(last_name__icontains=search_query) |
+            Q(username__icontains=search_query) |
+            Q(email__icontains=search_query)
+        )
 
     context = {
-        'conversation': conversation,
-        'other_user': other_user,
-        'messages': messages,
-        'form': form,
+        'teachers': teachers,
+        'admins': admins,
+        'search_query': search_query,
     }
-    return render(request, 'messaging/conversation_detail.html', context)
+    return render(request, 'messaging/new_conversation_selection.html', context)
