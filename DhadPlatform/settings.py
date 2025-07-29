@@ -42,7 +42,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions', # نظام الجلسات
     'django.contrib.messages', # نظام الرسائل (لإظهار رسائل للمستخدم)
     'django.contrib.staticfiles', # لخدمة الملفات الثابتة (CSS, JS, صور)
-
+    'django.contrib.humanize',
+    
     # تطبيقاتنا المخصصة
     'core',          # تطبيقنا الأساسي، سيحتوي على نموذج المستخدم المخصص
     'registration',  # تطبيق خاص بطلبات التسجيل ونموذجها
@@ -51,6 +52,7 @@ INSTALLED_APPS = [
     'payments',      # لإدارة الاشتراكات والدفع
     'contacts',
     'dashboard',
+    
 ]
 
 # إعدادات البرامج الوسيطة (Middleware)

@@ -13,7 +13,7 @@
                 <i class="fas fa-comments text-blue-600 ml-3"></i> محادثة مع
                 <span class="text-purple-700">{{ other_user.full_name|default:other_user.username }}</span>
             </h1>
-            <a href="{% url 'conversations_list' %}" class="text-blue-500 hover:text-blue-700 text-base flex items-center justify-center transition-colors duration-200">
+            <a href="{% url 'messaging:inbox' %}" class="text-blue-500 hover:text-blue-700 text-base flex items-center justify-center transition-colors duration-200">
                 <i class="fas fa-arrow-right ml-2 text-sm"></i> العودة إلى قائمة المحادثات
             </a>
         </div>
@@ -32,8 +32,8 @@
 
         {# صندوق الرسائل #}
         <div id="messages-container" class="border border-gray-300 p-4 h-[60vh] overflow-y-auto bg-gray-50 rounded-lg shadow-inner mb-6 flex flex-col-reverse relative"> {# ارتفاع أكثر استجابة وظل داخلي #}
-            {# الرسائل ستُعرض هنا بترتيب عكسي لتظهر الأحدث في الأسفل #}
-            {% for message in conversation_messages|reversed %} {# تأكد أن conversation_messages هو اسم المتغير الذي يمرره الـ view #}
+            {# الرسائل ستُعرض هنا بترتيب صحيح مع flex-col-reverse لتظهر الأحدث في الأسفل #}
+            {% for message in conversation_messages %} {# <<<<<<<<<<<<<<<< التعديل هنا: تمت إزالة |reversed #}
                 <div id="message-{{ message.id }}" class="mb-3 p-3 rounded-xl max-w-[80%] break-words animate-fade-in-up
                     {% if message.sender == request.user %}
                         bg-blue-600 text-white self-end text-right ml-auto shadow-md
@@ -55,7 +55,7 @@
         </div>
 
         {# نموذج إرسال الرسالة #}
-        <form method="post" action="{% url 'send_message' other_user_id=other_user.id %}" class="flex items-center space-x-4 space-x-reverse mt-6" id="message-form"> {# استخدام 'send_message' كـ URL #}
+        <form method="post" action="{% url 'messaging:conversation_detail' conversation_id=conversation.id %}" class="flex items-center space-x-4 space-x-reverse mt-6" id="message-form"> {# <<<<<<<<<<<<<<<< التعديل هنا: استخدام conversation_detail #}
             {% csrf_token %}
             <div class="flex-grow">
                 <input type="text" name="{{ form.content.name }}" id="{{ form.content.id_for_label }}"
@@ -95,6 +95,7 @@
 
         // وظيفة للتمرير إلى الأسفل في صندوق الرسائل
         function scrollToBottom() {
+            // التمرير إلى أعلى نقطة في المحتوى (أي أسفل الحاوية نظراً لـ flex-col-reverse)
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
         }
 
@@ -111,11 +112,10 @@
             }
 
             // تنسيق التاريخ والوقت
-            // يمكنك تعديل هذا إذا كانت الـ API ترجع التاريخ والوقت بتنسيق مختلف
             let formattedTimestamp = '';
             try {
-                const date = new Date(message.timestamp); // حاول تحليل التاريخ ككائن Date
-                // تحقق مما إذا كان التحليل ناجحًا
+                // تاريخ ووقت ISO 8601 يمكن تحليلهما بسهولة
+                const date = new Date(message.timestamp);
                 if (!isNaN(date.getTime())) {
                     const year = date.getFullYear();
                     const month = (date.getMonth() + 1).toString().padStart(2, '0');
@@ -124,43 +124,49 @@
                     const minutes = date.getMinutes().toString().padStart(2, '0');
                     formattedTimestamp = `${hours}:${minutes} ${year}-${month}-${day}`;
                 } else {
-                    // إذا فشل تحليل Date، استخدم التنسيق الأصلي أو تنسيق احتياطي
-                    formattedTimestamp = message.timestamp ? message.timestamp.split(' ')[1].substring(0, 5) + ' ' + message.timestamp.split(' ')[0] : '';
+                    // fallback if date parsing fails
+                    formattedTimestamp = message.timestamp ? message.timestamp.split('T')[1].substring(0, 5) + ' ' + message.timestamp.split('T')[0] : '';
                 }
             } catch (e) {
-                // في حال وجود أي خطأ أثناء تحليل التاريخ
-                formattedTimestamp = message.timestamp ? message.timestamp.split(' ')[1].substring(0, 5) + ' ' + message.timestamp.split(' ')[0] : '';
+                console.error("Error parsing timestamp:", e);
+                formattedTimestamp = message.timestamp ? message.timestamp.split('T')[1].substring(0, 5) + ' ' + message.timestamp.split('T')[0] : '';
             }
 
             messageDiv.innerHTML = `
                 <p class="font-bold text-sm mb-1 opacity-90">${message.is_from_me ? 'أنت' : message.sender_full_name || message.sender_username}</p>
                 <p class="text-base">${message.content}</p>
-                <span class="text-xs mt-1 block opacity-70 ${message.is_from_me ? 'text-left' : 'text-right'}">
+                <span class="text-xs mt-1 block opacity-70
+                    {% comment %} ملاحظة: محاذاة النص داخل span الوقت تعتمد على ما إذا كان المرسل هو المستخدم الحالي {% endcomment %}
+                    ${message.is_from_me ? 'text-left' : 'text-right'}">
                     ${formattedTimestamp}
                 </span>
             `;
-            // إضافة الرسالة في الأعلى لتظهر بترتيب عكسي، ثم التمرير للأسفل
+            // إضافة الرسالة في الأعلى لتظهر بترتيب عكسي (بسبب flex-col-reverse)،
+            // مما يجعلها تبدو في الأسفل عند التمرير
             messagesContainer.prepend(messageDiv);
         }
 
         // وظيفة Polling لجلب الرسائل الجديدة
         function fetchNewMessages() {
-            // جلب ID آخر رسالة موجودة في الـ DOM
-            const lastMessageElement = messagesContainer.querySelector('div[id^="message-"]');
-            const lastMessageId = lastMessageElement ? parseInt(lastMessageElement.id.replace('message-', '')) : 0;
+            // جلب ID آخر رسالة موجودة في الـ DOM (أول عنصر لأننا نستخدم prepend)
+            const firstMessageElement = messagesContainer.querySelector('div[id^="message-"]');
+            const lastMessageId = firstMessageElement ? parseInt(firstMessageElement.id.replace('message-', '')) : 0;
 
-            const otherUserId = "{{ other_user.id }}";
+            const conversationId = "{{ conversation.id }}"; // استخدام معرف المحادثة من سياق Django
 
-            fetch(`/conversation/${otherUserId}/?last_message_id=${lastMessageId}`, {
+            fetch(`/messages/${conversationId}/?last_message_id=${lastMessageId}`, { // <<<<<<<<<<<<<<<< التعديل هنا: استخدام مسار conversation_detail
                 method: 'GET',
                 headers: {
-                    'X-Requested-With': 'XMLHttpRequest', // للتعرف على طلب AJAX في Django
+                    'X-Requested-With': 'XMLHttpRequest',
                 }
             })
             .then(response => response.json())
             .then(data => {
                 if (data.messages && data.messages.length > 0) {
-                    data.messages.reverse().forEach(message => { // عكس الترتيب لإضافتها بالترتيب الصحيح (الأحدث في الأسفل)
+                    // الرسائل تأتي من الـ view مرتبة من الأقدم للأحدث،
+                    // والـ prepend يضيفها في بداية الحاوية، مما يجعلها تظهر في الأسفل بسبب flex-col-reverse
+                    // لذا لا نحتاج لـ .reverse() هنا إذا كان الـ view يرسل أقدم رسالة أولاً
+                    data.messages.forEach(message => { // لا يوجد .reverse() هنا
                         addMessageToDOM(message);
                     });
                     scrollToBottom(); // التمرير إلى الأسفل بعد إضافة الرسائل الجديدة
@@ -173,7 +179,9 @@
         setInterval(fetchNewMessages, 3000); // 3000ms = 3 seconds
 
         // التمرير للأسفل عند تحميل الصفحة لأول مرة
-        scrollToBottom();
+        // يجب أن يتم التمرير بعد ضمان تحميل جميع الرسائل الأولية
+        // قد تحتاج إلى تأخير بسيط إذا كانت الرسوم المتحركة تؤثر على ارتفاع المحتوى
+        setTimeout(scrollToBottom, 100); // تأخير بسيط للسماح للرسوم المتحركة بالانتهاء
 
         // معالجة إرسال النموذج باستخدام AJAX
         messageForm.addEventListener('submit', function(e) {

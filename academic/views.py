@@ -6,23 +6,28 @@ import json # For storing JSON data in TestResult answers
 from django.conf import settings # For accessing settings.py values (e.g., ARABIC_PLACEMENT_COURSE_ID)
 from django.utils import timezone # For timezone-aware datetime operations
 from django.http import JsonResponse, HttpResponse # استيراد JsonResponse و HttpResponse
-from .models import Course, Lesson, EducationalFile, Class, Assignment, Submission, Test, Question, Option, TestResult, LessonProgress # استيراد LessonProgress
-# Importing forms from the current app
-from .forms import SubmissionForm, BaseTestForm
-# Importing User model from core app
-from core.models import User 
 
-
+# Import all models from academic app
 from .models import (
+    Course,
+    Lesson,
+    EducationalFile,
+    Class,
+    Assignment,
+    Submission,
     Test,
+    Question,
+    Option,
     TestResult,
-    Question, # تأكد من استيراد Question
-    Option,   # تأكد من استيراد Option
+    LessonProgress,
     DETERMINED_LEVEL_CHOICES # استيراد المستويات
 )
-from academic.models import Class, Course # استيراد Class و Course للبحث عن الحصص
 
+# Importing forms from the current app
+from .forms import SubmissionForm, BaseTestForm
 
+# Importing User model from core app
+from core.models import User
 
 @login_required
 def course_detail(request, course_id):
@@ -34,10 +39,12 @@ def course_detail(request, course_id):
     
     is_subscribed = False
     classmates = [] # List of classmates in the same class for this course
-    
+    student_class = None # Initialize student_class here
+
     # Check if the user is a student and is subscribed to this course
     if request.user.role == 'student':
         # Get the specific class instance the student is enrolled in for this course
+        # This query is moved here from the template
         student_class = Class.objects.filter(course=course, students=request.user).first()
         if student_class:
             is_subscribed = True
@@ -45,18 +52,19 @@ def course_detail(request, course_id):
             classmates = student_class.students.exclude(id=request.user.id).order_by('first_name', 'last_name')
     
     # Fetch lessons and educational files for the course
-    lessons = Lesson.objects.filter(course=course).order_by('published_date')
+    # Assuming 'order' field exists for Lesson, otherwise use 'id' or 'published_date'
+    lessons = Lesson.objects.filter(course=course).order_by('published_date') # Changed to published_date as per your model
     educational_files = EducationalFile.objects.filter(course=course).order_by('-uploaded_at')
 
     # Logic for assignments
-    assignments = []
+    assignments_data = [] # Changed variable name to avoid conflict with assignments_qs
     if is_subscribed: # Assignments are only visible to subscribed students
         assignments_qs = Assignment.objects.filter(course=course).order_by('due_date')
         for assignment in assignments_qs:
             # Check if the student has already submitted this assignment
             submitted = Submission.objects.filter(assignment=assignment, student=request.user).first()
             
-            assignments.append({
+            assignments_data.append({
                 'assignment': assignment,
                 'submitted_data': submitted, # Submission data if already submitted
                 'has_submitted': submitted is not None,
@@ -66,10 +74,11 @@ def course_detail(request, course_id):
     context = {
         'course': course,
         'is_subscribed': is_subscribed,
+        'student_class': student_class, # Pass the student_class object
         'lessons': lessons,
         'educational_files': educational_files,
-        'youtube_embed_base_url': 'https://www.youtube.com/embed/', # Base URL for YouTube embeds
-        'assignments': assignments, # Pass assignment data
+        'youtube_embed_base_url': 'https://www.youtube.com/embed/', # Valid YouTube embed base URL
+        'assignments': assignments_data, # Pass assignment data
         'classmates': classmates, # Pass classmates list to the template
     }
     return render(request, 'academic/course_detail.html', context)
@@ -98,7 +107,7 @@ def submit_assignment(request, assignment_id):
     
     if not is_subscribed:
         messages.error(request, 'You must be subscribed to the course to submit this assignment.')
-        return redirect('course_detail', course_id=assignment.course.id)
+        return redirect('academic:course_detail', course_id=assignment.course.id) # Use namespace
 
     # Check if the student has already submitted this assignment
     existing_submission = Submission.objects.filter(assignment=assignment, student=request.user).first()
@@ -106,7 +115,7 @@ def submit_assignment(request, assignment_id):
         messages.info(request, 'You have already submitted this assignment. You can update the submission file if allowed.')
         # If allowing updates, you would modify the existing_submission here
         # For now, we just redirect back with an info message
-        return redirect('course_detail', course_id=assignment.course.id)
+        return redirect('academic:course_detail', course_id=assignment.course.id) # Use namespace
 
     form = SubmissionForm(request.POST, request.FILES) # Important: pass request.FILES for file uploads
     if form.is_valid():
@@ -117,11 +126,11 @@ def submit_assignment(request, assignment_id):
         submission.save()
 
         messages.success(request, f'Assignment "{assignment.title}" submitted successfully! It will be reviewed.')
-        return redirect('course_detail', course_id=assignment.course.id)
+        return redirect('academic:course_detail', course_id=assignment.course.id) # Use namespace
     else:
         messages.error(request, 'Assignment submission failed. Please ensure a file is selected.')
         # Redirect back to the course detail page to display errors
-        return redirect('course_detail', course_id=assignment.course.id)
+        return redirect('academic:course_detail', course_id=assignment.course.id) # Use namespace
 
 
 @login_required
@@ -209,14 +218,14 @@ def start_test(request, test_id):
 
     if student_user.role != 'student':
         messages.error(request, 'أنت لا تملك الصلاحية لبدء الاختبارات.')
-        return redirect('test_list')
+        return redirect('academic:test_list') # Use namespace
 
     # منطق خاص باختبارات تحديد المستوى
     if test.is_placement_test:
         # إذا كان مستوى الطالب محددًا بالفعل، يمنع من بدء اختبار تحديد مستوى جديد.
         if student_user.determined_arabic_level != 'unassigned':
             messages.warning(request, f"لقد تم تحديد مستواك مسبقاً كـ {student_user.get_determined_arabic_level_display()}. لا يمكنك البدء باختبار تحديد مستوى جديد.")
-            return redirect('test_list')
+            return redirect('academic:test_list') # Use namespace
 
         # البحث عن نتيجة اختبار تحديد مستوى جارية لهذا الطالب (لم تُحدد بعد)
         # يجب أن يكون status 'in_progress' لأننا نستخدمه لتتبع المراحل
@@ -234,7 +243,7 @@ def start_test(request, test_id):
             else:
                 # إذا كان test_id لا يتطابق، نوجه الطالب إلى الاختبار الجاري
                 messages.info(request, f"لديك اختبار تحديد مستوى آخر قيد التقدم: {current_placement_test_result.test.title}. سيتم توجيهك إليه.")
-                return redirect('start_test', test_id=current_placement_test_result.test.id)
+                return redirect('academic:start_test', test_id=current_placement_test_result.test.id) # Use namespace
         else:
             # إذا لم يكن هناك اختبار تحديد مستوى قيد التقدم، ابدأ هذا الاختبار
             messages.info(request, f"بدء اختبار تحديد مستوى جديد: {test.title}.")
@@ -248,10 +257,10 @@ def start_test(request, test_id):
             )
         
         # الأسئلة لهذا الاختبار المعين (المرحلة الحالية)
-        questions = test.question_set.all().order_by('?') # جلب الأسئلة عشوائياً
+        questions = test.questions.all().order_by('?') # Changed to 'questions' as per your model definition (related_name)
         if not questions.exists():
             messages.error(request, f'لا توجد أسئلة لهذا الاختبار: {test.title}. يرجى التواصل مع الإدارة.')
-            return redirect('test_list')
+            return redirect('academic:test_list') # Use namespace
 
         form = BaseTestForm(questions=questions, test_instance_id=test_result.id)
 
@@ -270,12 +279,12 @@ def start_test(request, test_id):
         existing_result = TestResult.objects.filter(test=test, student=student_user).first()
         if existing_result and existing_result.status in ['completed', 'finalized']: # تم تغيير 'submitted', 'graded' إلى completed/finalized
             messages.info(request, f'لقد أكملت هذا الاختبار مسبقاً. نتيجتك: {existing_result.score}.')
-            return redirect('test_list')
+            return redirect('academic:test_list') # Use namespace
 
-        questions = test.question_set.all().order_by('?')
+        questions = test.questions.all().order_by('?') # Changed to 'questions' as per your model definition (related_name)
         if not questions.exists():
             messages.error(request, 'لا توجد أسئلة لهذا الاختبار.')
-            return redirect('test_list')
+            return redirect('academic:test_list') # Use namespace
         
         # إنشاء نتيجة اختبار جديدة للاختبارات العادية
         test_result = TestResult.objects.create(
@@ -316,7 +325,7 @@ def submit_test(request, test_result_id):
         return redirect('dashboard')
 
     # جلب الأسئلة التي تم عرضها في النموذج (جميع أسئلة هذا الاختبار المحدد)
-    questions_to_evaluate = test.question_set.all()
+    questions_to_evaluate = test.questions.all() # Changed to 'questions' as per your model definition (related_name)
 
     form = BaseTestForm(request.POST, questions=questions_to_evaluate, test_instance_id=test_result.id)
 
@@ -356,7 +365,7 @@ def submit_test(request, test_result_id):
                 test_result.determined_level_at_this_stage = test.level
                 test_result.save()
                 messages.success(request, f"أداء ممتاز في {test.title}! سيتم توجيهك إلى اختبار المستوى التالي ({test.next_test_on_success.title}).")
-                return redirect('start_test', test_id=test.next_test_on_success.id)
+                return redirect('academic:start_test', test_id=test.next_test_on_success.id) # Use namespace
 
             elif percentage_score >= PASS_THRESHOLD:
                 # أداء متوسط: يتم تحديد مستوى الطالب بهذا المستوى بشكل نهائي
@@ -379,7 +388,7 @@ def submit_test(request, test_result_id):
                 
                 if test.next_test_on_failure:
                     messages.warning(request, f"نتيجتك في {test.title} تتطلب منك إعادة اختبار تحديد المستوى بمستوى أدنى. سيتم توجيهك الآن إلى {test.next_test_on_failure.title}.")
-                    return redirect('start_test', test_id=test.next_test_on_failure.id)
+                    return redirect('academic:start_test', test_id=test.next_test_on_failure.id) # Use namespace
                 else:
                     # إذا لم يكن هناك اختبار أدنى متاح (وصل إلى أدنى مستوى ولم ينجح فيه)
                     # يتم تعيينه للمستوى الأدنى (A1) وتفعيله أو تجميده
@@ -398,7 +407,9 @@ def submit_test(request, test_result_id):
         # ----------------------------------------------------------------------
         else:
             # للاختبارات العادية، نقوم بحساب النتيجة وتحديد ما إذا كان قد اجتاز
-            test_result.passed = (percentage_score >= settings.REGULAR_TEST_PASS_THRESHOLD) # افترض أن لديك هذا الإعداد في settings
+            # Ensure REGULAR_TEST_PASS_THRESHOLD is defined in your settings.py
+            pass_threshold = getattr(settings, 'REGULAR_TEST_PASS_THRESHOLD', 60) # Default to 60 if not set
+            test_result.passed = (percentage_score >= pass_threshold) 
             test_result.status = 'completed'
             test_result.save()
 
@@ -407,12 +418,12 @@ def submit_test(request, test_result_id):
             else:
                 messages.error(request, f"لم تتمكن من اجتياز اختبار {test.title}. نتيجتك: {test_result.score}/{max_score}. يرجى المحاولة مرة أخرى.")
             
-            return redirect('test_list') # أو صفحة نتائج الاختبار الفردية
+            return redirect('academic:test_list') # أو صفحة نتائج الاختبار الفردية # Use namespace
 
     else:
         # إذا كانت البيانات غير صالحة (خطأ في الفورم)، أعد عرض النموذج مع الأخطاء
         messages.error(request, "حدث خطأ أثناء إرسال الاختبار. يرجى مراجعة إجاباتك.")
-        questions_to_display = test.question_set.all().order_by('?')
+        questions_to_display = test.questions.all().order_by('?') # Changed to 'questions' as per your model definition (related_name)
         context = {
             'test': test,
             'form': form, # الفورم الذي يحتوي على الأخطاء
@@ -434,7 +445,14 @@ def found_class_and_activate_student(request, student_user, determined_level):
         # تأكد من أن settings.ARABIC_PLACEMENT_COURSE_ID موجود ويحتوي على ID المادة الأساسية
         # يمكنك إضافة هذا المتغير في ملف settings.py
         # مثال: ARABIC_PLACEMENT_COURSE_ID = 1 # ID للمادة "اللغة العربية"
-        arabic_course = Course.objects.filter(is_placement_course=True).first() # افترض أن هناك مادة واحدة لتحديد المستوى
+        # Changed to fetch based on is_placement_course or a specific ID from settings
+        arabic_course = None
+        if hasattr(settings, 'ARABIC_PLACEMENT_COURSE_ID') and settings.ARABIC_PLACEMENT_COURSE_ID:
+            arabic_course = Course.objects.filter(id=settings.ARABIC_PLACEMENT_COURSE_ID).first()
+        if not arabic_course:
+            # Fallback if no specific ID or if ID not found, try to find one marked as placement
+            arabic_course = Course.objects.filter(is_placement_course=True).first()
+
         if arabic_course:
             # البحث عن حصص في هذه المادة تطابق المستوى المحدد للطالب أو 'any'
             available_classes = Class.objects.filter(
@@ -457,7 +475,7 @@ def found_class_and_activate_student(request, student_user, determined_level):
         found_class.students.add(student_user) # تسجيل الطالب في الحصة
         student_user.is_active = True # تفعيل حساب الطالب
         student_user.save()
-        messages.success(request, f'تهانينا! لقد تم تسجيلك تلقائياً في حصة "{found_class.course.name}" مع المعلم {found_class.teacher.username}.')
+        messages.success(request, f'تهانينا! لقد تم تسجيلك تلقائياً في حصة "{found_class.course.name}" مع المعلم {found_class.teacher.get_full_name() or found_class.teacher.username}.') # Use get_full_name
     else:
         # إذا لم يتم العثور على حصة مناسبة
         student_user.is_active = False # تجميد حساب الطالب
@@ -496,4 +514,3 @@ def mark_lesson_as_completed(request, lesson_id):
 
         return JsonResponse({'status': 'success', 'message': message})
     return HttpResponse(status=400) # إذا لم يكن طلب AJAX أو طريقة غير صحيحة
-

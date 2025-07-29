@@ -3,7 +3,7 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.utils import timezone
-from django.apps import apps # Added to import models dynamically
+from django.apps import apps
 
 # --------------------------------------------------------------------------
 # نقل DEFINED_LEVEL_CHOICES إلى هنا لتجنب الاستيراد الدائري
@@ -84,14 +84,11 @@ class User(AbstractUser):
         يرجع قائمة بالبرامج الفريدة التي سجل فيها الطالب.
         """
         if self.role != 'student':
-            # ليس هناك حاجة لإعادة استيراد 'apps' إذا كانت مستوردة بالفعل في أعلى الملف
-            # من الأفضل استيرادها مرة واحدة في أعلى الملف
-            Program = apps.get_model('academic', 'Program') # CORRECTED: apps.get_model
+            Program = apps.get_model('academic', 'Program') 
             return Program.objects.none()
 
-        # CORRECTED: apps.get_model everywhere
         Course = apps.get_model('academic', 'Course')
-        Program = apps.get_model('academic', 'Program') # CORRECTED: apps.get_model
+        Program = apps.get_model('academic', 'Program') 
 
         enrolled_courses = Course.objects.filter(classes__students=self).distinct()
         programs = Program.objects.filter(courses__in=enrolled_courses).distinct().order_by('name')
@@ -110,10 +107,10 @@ class User(AbstractUser):
         يرجع قائمة بالمواد (الكورسات) الفريدة التي سجل فيها الطالب.
         """
         if self.role != 'student':
-            Course = apps.get_model('academic', 'Course') # CORRECTED: apps.get_model
+            Course = apps.get_model('academic', 'Course') 
             return Course.objects.none()
         
-        Course = apps.get_model('academic', 'Course') # CORRECTED: apps.get_model
+        Course = apps.get_model('academic', 'Course') 
         return Course.objects.filter(classes__students=self).distinct().order_by('name')
 
     # --------------------------------------------------------------------------
@@ -124,12 +121,12 @@ class User(AbstractUser):
         يرجع قائمة بالحلقات الدراسية (Classes) القادمة التي سجل فيها الطالب.
         """
         if self.role != 'student':
-            Class = apps.get_model('academic', 'Class') # CORRECTED: apps.get_model
+            Class = apps.get_model('academic', 'Class') 
             return Class.objects.none()
 
         now = timezone.now()
         
-        Class = apps.get_model('academic', 'Class') # CORRECTED: apps.get_model
+        Class = apps.get_model('academic', 'Class') 
 
         upcoming_classes = Class.objects.filter(
             students=self,
@@ -158,12 +155,11 @@ class User(AbstractUser):
             return 0  # Only students have progress percentage
 
         # Dynamically get models from the 'academic' app to avoid circular imports
-        # CORRECTED: apps.get_model everywhere
         Course = apps.get_model('academic', 'Course')
         Lesson = apps.get_model('academic', 'Lesson')
-        LessonProgress = apps.get_model('academic', 'LessonProgress') # Assuming you have a LessonProgress model
+        LessonProgress = apps.get_model('academic', 'LessonProgress') 
         Test = apps.get_model('academic', 'Test')
-        TestResult = apps.get_model('academic', 'TestResult') # Assuming you have a TestResult model
+        TestResult = apps.get_model('academic', 'TestResult') 
 
         total_progress_points = 0
         achieved_progress_points = 0
@@ -183,7 +179,7 @@ class User(AbstractUser):
             completed_lessons_count += LessonProgress.objects.filter(
                 student=self,
                 lesson__course=course,
-                is_completed=True
+                status='completed' # <-- CHANGED THIS LINE: Use status='completed'
             ).count()
 
         if total_lessons_in_enrolled_courses > 0:

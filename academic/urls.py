@@ -3,6 +3,7 @@ from . import views
 from django.conf import settings
 from django.conf.urls.static import static
 
+app_name = 'academic'
 urlpatterns = [
     path('course/<int:course_id>/', views.course_detail, name='course_detail'),
     path('assignment/<int:assignment_id>/submit/', views.submit_assignment, name='submit_assignment'),

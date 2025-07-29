@@ -1,4 +1,4 @@
-{% load static %}
+{% load static %} {# حمل وسم static لتحميل الملفات الثابتة #}
 
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
@@ -6,851 +6,359 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}منصة ضاد التعليمية{% endblock %}</title>
+    {# الأيقونة المفضلة للموقع #}
+    <link rel="icon" type="image/png" href="{% static 'images/dhad_favicon.ico' %}"> 
     
-    <!-- SEO Meta Tags -->
-    <meta name="description" content="منصة ضاد التعليمية - منصة تعليمية متقدمة للطلاب العرب">
-    <meta name="keywords" content="تعليم، منصة تعليمية، اختبارات، طلاب، تعلم">
-    <meta name="author" content="منصة ضاد التعليمية">
-    
-    <!-- الأيقونة المفضلة للموقع -->
-    <link rel="icon" type="image/png" href="{% static 'images/dhad_favicon.ico' %}">
-    
-    <!-- تضمين خطوط Google Fonts المحسنة -->
+    {# تضمين خطوط Google Fonts: Cairo و Almarai و Karla #}
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Almarai:wght@300;400;700;800&family=Cairo:wght@200..1000&family=Karla:ital,wght@0,200..800;1,200..800&display=swap" rel="stylesheet">
-    
-    <!-- تحميل Tailwind CSS من CDN -->
+    {# نهاية تضمين خطوط Google Fonts #}
+
+    {# تحميل Tailwind CSS من CDN #}
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- تحميل Font Awesome لأيقونات احترافية -->
+    {# تحميل Font Awesome لأيقونات احترافية #}
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     
-    <!-- تكوين Tailwind CSS المخصص -->
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: {
-                            50: '#eff6ff',
-                            100: '#dbeafe',
-                            200: '#bfdbfe',
-                            300: '#93c5fd',
-                            400: '#60a5fa',
-                            500: '#3b82f6',
-                            600: '#2563eb',
-                            700: '#1d4ed8',
-                            800: '#1e40af',
-                            900: '#1e3a8a',
-                        },
-                        accent: {
-                            50: '#f0fdf4',
-                            100: '#dcfce7',
-                            200: '#bbf7d0',
-                            300: '#86efac',
-                            400: '#4ade80',
-                            500: '#22c55e',
-                            600: '#16a34a',
-                            700: '#15803d',
-                            800: '#166534',
-                            900: '#14532d',
-                        }
-                    },
-                    animation: {
-                        'fade-in': 'fadeIn 0.6s ease-out forwards',
-                        'fade-in-up': 'fadeInUp 0.7s ease-out forwards',
-                        'fade-in-down': 'fadeInDown 0.7s ease-out forwards',
-                        'slide-in-right': 'slideInRight 0.5s ease-out forwards',
-                        'bounce-gentle': 'bounceGentle 2s infinite',
-                        'glow': 'glow 2s ease-in-out infinite alternate',
-                        'gradient-shift': 'gradientShift 3s ease-in-out infinite',
-                    }
-                }
-            }
-        }
-    </script>
-    
+    {# كتلية للأنماط الإضافية الخاصة بكل صفحة #}
     {% block extra_head %}{% endblock %}
 
     <style>
         /* تطبيق خط Cairo على كامل المستند */
         html {
             font-family: 'Cairo', sans-serif;
-            scroll-behavior: smooth;
         }
         
-        body {
-            direction: rtl;
-            text-align: right;
-            font-family: 'Cairo', sans-serif;
-            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        /* تعريف الرسوم المتحركة الأساسية */
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
-
-        /* الرسوم المتحركة المحسنة */
         @keyframes fadeIn {
             from { opacity: 0; }
             to { opacity: 1; }
         }
+        /* كلاسات لتطبيق الرسوم المتحركة */
+        .animate-fade-in-down { animation: fadeInDown 0.7s ease-out forwards; }
+        .animate-fade-in { animation: fadeIn 0.8s ease-out forwards; }
 
-        @keyframes fadeInUp {
-            from { 
-                opacity: 0; 
-                transform: translateY(30px); 
-            }
-            to { 
-                opacity: 1; 
-                transform: translateY(0); 
-            }
-        }
-
-        @keyframes fadeInDown {
-            from { 
-                opacity: 0; 
-                transform: translateY(-20px); 
-            }
-            to { 
-                opacity: 1; 
-                transform: translateY(0); 
-            }
-        }
-
-        @keyframes slideInRight {
-            from { 
-                opacity: 0; 
-                transform: translateX(100%); 
-            }
-            to { 
-                opacity: 1; 
-                transform: translateX(0); 
-            }
-        }
-
-        @keyframes bounceGentle {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
-        }
-
-        @keyframes glow {
-            from { box-shadow: 0 0 20px rgba(59, 130, 246, 0.3); }
-            to { box-shadow: 0 0 30px rgba(59, 130, 246, 0.6); }
-        }
-
-        @keyframes gradientShift {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
-        /* تخصيص شريط التمرير المحسن */
+        /* تخصيص شريط التمرير (Scrollbar) */
         ::-webkit-scrollbar {
-            width: 12px;
+            width: 10px;
         }
         ::-webkit-scrollbar-track {
-            background: linear-gradient(to bottom, #f1f5f9, #e2e8f0);
-            border-radius: 12px;
+            background: #f1f1f1;
+            border-radius: 10px;
         }
         ::-webkit-scrollbar-thumb {
-            background: linear-gradient(to bottom, #3b82f6, #1d4ed8);
-            border-radius: 12px;
-            border: 2px solid #f1f5f9;
+            background: #888;
+            border-radius: 10px;
         }
         ::-webkit-scrollbar-thumb:hover {
-            background: linear-gradient(to bottom, #1d4ed8, #1e3a8a);
+            background: #555;
         }
 
-        /* الكلاسات الأساسية المحسنة */
+        /* لضمان عمل "text-right" بشكل افتراضي على مستوى الجسم */
+        body {
+            direction: rtl;
+            text-align: right;
+            font-family: 'Cairo', sans-serif; /* تأكيد تطبيق الخط هنا أيضًا */
+        }
+
+        /* كلاسات مساعدة لـ Tailwind لسهولة التطبيق */
         .nav-link {
-            @apply text-slate-600 hover:text-primary-600 transition-all duration-300 font-medium relative py-3 px-2 rounded-lg;
-            position: relative;
-            overflow: hidden;
+            @apply text-gray-600 hover:text-blue-700 transition duration-300 font-medium relative py-2;
         }
-
-        .nav-link::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            right: 0;
-            width: 0;
-            height: 100%;
-            background: linear-gradient(90deg, rgba(59, 130, 246, 0.1), rgba(59, 130, 246, 0.05));
-            transition: width 0.3s ease;
-            border-radius: 0.5rem;
-        }
-
-        .nav-link:hover::before {
-            width: 100%;
-        }
-
         .nav-link-active {
-            @apply text-primary-700 font-semibold bg-primary-50 shadow-sm;
+            @apply text-blue-700 font-semibold;
         }
-
+        /* لتطبيق الخط تحت الرابط النشط */
         .nav-link-active::after {
             content: '';
-            @apply absolute bottom-1 right-1/2 w-1/2 h-0.5 bg-gradient-to-r from-primary-600 to-primary-400 transform translate-x-1/2 rounded-full;
+            @apply absolute bottom-0 right-0 w-full h-0.5 bg-blue-600 transform scale-x-100; /* Scale-x-100 for active */
+            transform-origin: right; 
         }
-
-        /* الأزرار المحسنة */
-        .btn-primary {
-            @apply bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 active:translate-y-0;
-        }
-
-        .btn-secondary {
-            @apply bg-gradient-to-r from-accent-500 to-accent-600 hover:from-accent-600 hover:to-accent-700 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 active:translate-y-0;
-        }
-
-        /* قائمة الجوال المحسنة */
-        .mobile-nav-overlay {
-            backdrop-filter: blur(10px);
-            background: rgba(15, 23, 42, 0.85);
-        }
-
-        .mobile-nav-content {
-            background: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(51, 65, 85, 0.95) 100%);
-        }
-
-        .mobile-nav-link {
-            @apply text-white text-xl hover:text-primary-300 transition-all duration-300 block py-4 px-4 rounded-lg hover:bg-white/10 backdrop-blur-sm;
-        }
-
-        .mobile-nav-link-button {
-            @apply text-white px-8 py-4 rounded-xl font-semibold transition-all duration-300 text-xl w-full max-w-xs mx-auto block text-center shadow-lg hover:shadow-xl transform hover:-translate-y-1;
-        }
-
-        .mobile-nav-link-blue {
-            @apply mobile-nav-link-button bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800;
-        }
-
-        .mobile-nav-link-green {
-            @apply mobile-nav-link-button bg-gradient-to-r from-accent-500 to-accent-600 hover:from-accent-600 hover:to-accent-700;
-        }
-
-        .mobile-nav-link-red {
-            @apply mobile-nav-link-button bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700;
-        }
-
-        /* رسائل النظام المحسنة */
-        .message-container {
-            @apply p-5 rounded-xl border-r-4 shadow-lg backdrop-blur-sm;
-        }
-
-        .message-success {
-            @apply bg-gradient-to-r from-emerald-50 to-green-50 text-emerald-800 border-emerald-500 shadow-emerald-100;
-        }
-
-        .message-error {
-            @apply bg-gradient-to-r from-red-50 to-rose-50 text-red-800 border-red-500 shadow-red-100;
-        }
-
-        /* تأثيرات الفوكس والتركيز */
-        .focus-ring {
-            @apply focus:outline-none focus:ring-4 focus:ring-primary-100 focus:border-primary-500;
-        }
-
-        /* الهيدر المحسن */
-        .header-gradient {
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.95) 100%);
-            backdrop-filter: blur(20px);
-            border-bottom: 1px solid rgba(226, 232, 240, 0.8);
-        }
-
-        /* الفوتر المحسن */
-        .footer-gradient {
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
-        }
-
-        /* تأثيرات الصور */
-        .profile-image {
-            @apply transition-all duration-300 hover:scale-110 hover:shadow-lg hover:ring-4 hover:ring-primary-200;
-        }
-
-        /* تحسينات إضافية للأيقونات */
-        .icon-bounce:hover {
-            animation: bounceGentle 0.6s ease-in-out;
-        }
-
-        /* تأثير الزجاج المضبب */
-        .glass-effect {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-        /* تحسينات الاستجابة */
-        @media (max-width: 768px) {
-            .mobile-nav-content {
-                padding: 2rem 1rem;
-            }
-        }
-
-        /* تأثيرات التمرير */
-        .scroll-reveal {
-            opacity: 0;
-            transform: translateY(50px);
-            transition: all 0.6s ease-out;
-        }
-
-        .scroll-reveal.revealed {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        /* Loading Animation */
-        .loading-dots::after {
+        /* لتأثير الخط عند التحويم على الروابط غير النشطة */
+        .nav-link:not(.nav-link-active)::after {
             content: '';
-            animation: loading 1.5s infinite;
+            @apply absolute bottom-0 right-0 w-full h-0.5 bg-blue-600 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300;
+            transform-origin: right;
         }
 
-        @keyframes loading {
-            0%, 20% { opacity: 0; }
-            50% { opacity: 1; }
-            100% { opacity: 0; }
+        .btn-primary {
+            @apply bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 transition duration-300 shadow-md;
+        }
+        .btn-secondary {
+            @apply bg-green-500 text-white px-5 py-2 rounded-lg hover:bg-green-600 transition duration-300 shadow-md;
+        }
+
+        /* أنماط قائمة الجوال */
+        .mobile-nav-link {
+            @apply text-white text-2xl hover:text-blue-300 transition duration-300 block py-3;
+        }
+        .mobile-nav-link-blue {
+            @apply bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition duration-300 text-2xl w-full max-w-xs mx-auto;
+        }
+        .mobile-nav-link-green {
+            @apply bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-600 transition duration-300 text-2xl w-full max-w-xs mx-auto;
+        }
+        .mobile-nav-link-red {
+            @apply bg-red-500 text-white px-6 py-3 rounded-lg hover:bg-red-600 transition duration-300 text-2xl w-full max-w-xs mx-auto;
         }
     </style>
 </head>
-
-<body class="font-sans antialiased min-h-screen" style="font-family: 'Cairo', sans-serif;">
+<body class="font-sans antialiased bg-gray-100" style="font-family: 'Cairo', sans-serif;">
     <div class="min-h-screen flex flex-col">
 
-        <!-- رأس الصفحة المحسن -->
-        <header class="header-gradient shadow-xl p-4 sticky top-0 z-50 animate-fade-in-down"> 
+        {# رأس الصفحة (شريط التنقل) #}
+        <header class="bg-white shadow-lg p-4 sticky top-0 z-50"> {# شريط علوي ثابت ومرتفع #}
             <nav class="container mx-auto flex justify-between items-center">
-                <!-- شعار المنصة المحسن -->
-                <a href="{% url 'core:index' %}" class="flex items-center text-2xl font-bold text-primary-700 hover:text-primary-800 transition-all duration-300 transform hover:scale-105">
-                    <img src="{% static 'images/dhad_favicon.ico' %}" alt="شعار منصة ضاد" class="h-12 w-auto ml-3 animate-bounce-gentle"> 
-                    <span class="bg-gradient-to-r from-primary-600 to-primary-800 bg-clip-text text-transparent">منصة ضاد</span>
+                {# شعار المنصة #}
+                <a href="{% url 'core:index' %}" class="flex items-center text-2xl font-bold text-blue-700 hover:text-blue-800 transition duration-300">
+                    <img src="{% static 'images/dhad_favicon.ico' %}" alt="شعار منصة ضاد" class="h-10 w-auto ml-3"> 
+                    منصة ضاد
                 </a>
 
-                <!-- روابط التنقل المحسنة -->
-                <div class="hidden md:flex space-x-2 space-x-reverse items-center">
-                    <a href="{% url 'core:index' %}" class="nav-link {% if request.resolver_match.url_name == 'index' %}nav-link-active{% endif %}">
-                        <i class="fas fa-home ml-2"></i>الرئيسية
-                    </a>
+                {# روابط التنقل الرئيسية (لشاشات العرض الكبيرة) #}
+                <div class="hidden md:flex space-x-6 space-x-reverse items-center"> {# إخفاء في الجوال، إظهار في الأجهزة اللوحية وما فوق #}
+                    <a href="{% url 'core:index' %}" class="nav-link {% if request.resolver_match.url_name == 'index' %}nav-link-active{% endif %}">الرئيسية</a>
                     
-                    {% if request.user.is_authenticated and request.user.is_staff %}
-                        <a href="{% url 'dashboard:admin_dashboard' %}" class="nav-link">
-                            <i class="fas fa-tachometer-alt ml-2"></i>لوحة التحكم الإدارية
+                    {# رابط لوحة تحكم الإدارة #}
+                    {% if request.user.is_authenticated and request.user.is_staff %} {# is_staff تعني أن المستخدم لديه صلاحيات وصول للوحة الإدارة #}
+                        <a href="{% url 'admin:index' %}" class="nav-link"> {# توجيه إلى لوحة الإدارة الافتراضية لـ Django #}
+                            <i class="fas fa-user-shield ml-2"></i> لوحة تحكم المدير
                         </a>
                     {% endif %}
-                    
-                    <a href="{% url 'core:about_platform' %}" class="nav-link {% if request.resolver_match.url_name == 'about_platform' %}nav-link-active{% endif %}">
-                        <i class="fas fa-info-circle ml-2"></i>عن المنصة
-                    </a>
-                    
-                    <a href="{% url 'contacts:contact' %}" class="nav-link {% if request.resolver_match.view_name == 'contacts:contact' %}nav-link-active{% endif %}">
-                        <i class="fas fa-envelope ml-2"></i>تواصل معنا
-                    </a>
+
+                    <a href="{% url 'core:about_platform' %}" class="nav-link {% if request.resolver_match.url_name == 'about_platform' %}nav-link-active{% endif %}">عن المنصة</a>
+                    <a href="{% url 'contacts:contact' %}" class="nav-link {% if request.resolver_match.view_name == 'contacts:contact' %}nav-link-active{% endif %}">تواصل معنا</a>
 
                     {% if user.is_authenticated %}
-                        <!-- روابط المستخدم المسجل -->
-                        <a href="{% url 'core:dashboard' %}" class="nav-link {% if request.resolver_match.url_name == 'core:dashboard' %}nav-link-active{% endif %}">
-                            <i class="fas fa-chart-line ml-2"></i>لوحة التحكم
-                        </a>
+                        {# روابط المستخدم المسجل دخول #}
+                        {% if user.role == 'student' %}
+                            <a href="{% url 'core:dashboard' %}" class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}nav-link-active{% endif %}">لوحة تحكم الطالب</a>
+                            <a href="{% url 'messaging:inbox' %}" class="nav-link {% if request.resolver_match.url_name == 'inbox' %}nav-link-active{% endif %}">الرسائل</a>
+                            <a href="{% url 'academic:test_list' %}" class="nav-link {% if request.resolver_match.url_name == 'test_list' %}nav-link-active{% endif %}">الاختبارات</a>
+                        {% elif user.role == 'teacher' %}
+                            <a href="{% url 'core:teacher_dashboard' %}" class="nav-link {% if request.resolver_match.url_name == 'teacher_dashboard' %}nav-link-active{% endif %}">لوحة تحكم المعلم</a>
+                            {# يمكن إضافة روابط أخرى خاصة بالمعلم هنا #}
+                            <a href="{% url 'messaging:inbox' %}" class="nav-link {% if request.resolver_match.url_name == 'inbox' %}nav-link-active{% endif %}">الرسائل</a>
+                        {% endif %}
                         
-                        <a href="{% url 'messaging:inbox' %}" class="nav-link {% if request.resolver_match.url_name == 'inbox' %}nav-link-active{% endif %} relative">
-                            <i class="fas fa-comments ml-2"></i>الرسائل
-                            <span class="absolute -top-1 -left-1 bg-red-500 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center animate-pulse">3</span>
-                        </a>
-                        
-                        <a href="{% url 'test_list' %}" class="nav-link {% if request.resolver_match.url_name == 'test_list' %}nav-link-active{% endif %}">
-                            <i class="fas fa-clipboard-list ml-2"></i>الاختبارات
-                        </a>
-                        
-                        <!-- قائمة الملف الشخصي المحسنة -->
+                        {# قائمة منسدلة للملف الشخصي (للمستخدمين المسجلين دخول) #}
                         <div class="relative group">
-                            <button class="nav-link flex items-center focus:outline-none focus-ring rounded-lg">
+                            <button class="nav-link flex items-center focus:outline-none">
                                 {% if user.profile_picture %}
-                                    <img src="{{ user.profile_picture.url }}" alt="صورة الملف الشخصي" class="w-10 h-10 rounded-full object-cover border-3 border-primary-400 ml-2 profile-image">
+                                    <img src="{{ user.profile_picture.url }}" alt="صورة الملف الشخصي" class="w-9 h-9 rounded-full object-cover border-2 border-blue-400 ml-2">
                                 {% else %}
-                                    <img src="{% static 'images/default_profile.png' %}" alt="صورة افتراضية" class="w-10 h-10 rounded-full object-cover border-3 border-primary-400 ml-2 profile-image">
+                                    <img src="{% static 'images/default_profile.png' %}" alt="صورة افتراضية" class="w-9 h-9 rounded-full object-cover border-2 border-blue-400 ml-2">
                                 {% endif %}
-                                <span class="hidden lg:inline font-semibold">{{ user.username }}</span>
-                                <i class="fas fa-chevron-down mr-2 text-sm transition-transform duration-300 group-hover:rotate-180"></i>
+                                <span class="hidden lg:inline">{{ user.username }}</span> {# عرض اسم المستخدم على الشاشات الكبيرة #}
+                                <i class="fas fa-chevron-down mr-2 text-sm"></i>
                             </button>
-                            
-                            <div class="absolute right-0 mt-3 w-56 glass-effect rounded-xl shadow-2xl py-2 z-20 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform origin-top-right scale-95 group-hover:scale-100">
-                                <a href="{% url 'core:profile' %}" class="flex items-center px-5 py-3 text-slate-700 hover:bg-white/20 hover:text-primary-700 transition-all duration-200 rounded-lg mx-2">
-                                    <i class="fas fa-user-circle ml-3 text-primary-500"></i>الملف الشخصي
+                            <div class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-20 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition duration-300 transform origin-top-right scale-95 group-hover:scale-100">
+                                <a href="{% url 'core:profile' %}" class="block px-4 py-2 text-gray-800 hover:bg-blue-100 hover:text-blue-700">
+                                    <i class="fas fa-user-circle ml-2"></i> الملف الشخصي
                                 </a>
-                                <a href="{% url 'core:account_settings' %}" class="flex items-center px-5 py-3 text-slate-700 hover:bg-white/20 hover:text-primary-700 transition-all duration-200 rounded-lg mx-2">
-                                    <i class="fas fa-cog ml-3 text-primary-500"></i>الإعدادات
+                                <a href="{% url 'core:account_settings' %}" class="block px-4 py-2 text-gray-800 hover:bg-blue-100 hover:text-blue-700">
+                                    <i class="fas fa-cog ml-2"></i> الإعدادات
                                 </a>
-                                <div class="border-t border-white/20 my-2 mx-4"></div>
-                                <form action="{% url 'logout' %}" method="post" class="mx-2">
-                                    {% csrf_token %}
-                                    <button type="submit" class="w-full flex items-center px-5 py-3 text-red-600 hover:bg-red-50 hover:text-red-700 transition-all duration-200 rounded-lg text-right">
-                                        <i class="fas fa-sign-out-alt ml-3"></i>تسجيل الخروج
+                                <div class="border-t border-gray-200 my-1"></div>
+                                <form action="{% url 'logout' %}" method="post" class="block">
+                                    {% csrf_token %} {# هذا ضروري للأمان #}
+                                    <button type="submit" class="w-full text-right px-4 py-2 text-red-600 hover:bg-red-100 hover:text-red-700">
+                                        <i class="fas fa-sign-out-alt ml-2"></i> تسجيل الخروج
                                     </button>
                                 </form>
                             </div>
                         </div>
                     {% else %}
-                        <!-- روابط الزوار المحسنة -->
-                        <a href="{% url 'register_request' %}" class="btn-primary icon-bounce">
-                            <i class="fas fa-user-plus ml-2"></i>سجل الآن
-                        </a>
-                        <a href="{% url 'login' %}" class="btn-secondary icon-bounce">
-                            <i class="fas fa-sign-in-alt ml-2"></i>تسجيل الدخول
-                        </a>
+                        {# روابط الزوار (غير مسجلين دخول) #}
+                        <a href="{% url 'register_request' %}" class="btn-primary">سجل الآن</a>
+                        <a href="{% url 'login' %}" class="btn-secondary">تسجيل الدخول</a>
                     {% endif %}
                 </div>
 
-                <!-- زر القائمة المحسن -->
+                {# زر قائمة الهمبرغر (لشاشات الجوال) #}
                 <div class="md:hidden">
-                    <button id="mobile-menu-button" class="text-slate-600 hover:text-primary-600 focus:outline-none focus:text-primary-600 p-2 rounded-lg hover:bg-primary-50 transition-all duration-300">
+                    <button id="mobile-menu-button" class="text-gray-600 hover:text-blue-600 focus:outline-none focus:text-blue-600">
                         <i class="fas fa-bars text-2xl"></i>
                     </button>
                 </div>
             </nav>
         </header>
 
-        <!-- قائمة الجوال المحسنة -->
-        <div id="mobile-menu" class="fixed inset-0 mobile-nav-overlay z-40 hidden md:hidden transform translate-x-full transition-all duration-500 ease-in-out">
-            <div class="mobile-nav-content h-full flex flex-col justify-center items-center relative overflow-y-auto">
-                <button id="close-mobile-menu-button" class="absolute top-6 left-6 text-white hover:text-primary-300 focus:outline-none transition-all duration-300 hover:rotate-90">
-                    <i class="fas fa-times text-3xl"></i>
-                </button>
-                
-                <div class="flex flex-col space-y-6 text-center w-full max-w-sm px-6">
-                    {% if user.is_authenticated %}
-                        <!-- معلومات المستخدم -->
-                        <div class="flex flex-col items-center mb-8 animate-fade-in-up">
-                            {% if user.profile_picture %}
-                                <img src="{{ user.profile_picture.url }}" alt="صورة الملف الشخصي" class="w-24 h-24 rounded-full object-cover border-4 border-primary-400 mb-4 shadow-xl profile-image">
-                            {% else %}
-                                <img src="{% static 'images/default_profile.png' %}" alt="صورة افتراضية" class="w-24 h-24 rounded-full object-cover border-4 border-primary-400 mb-4 shadow-xl profile-image">
-                            {% endif %}
-                            <span class="text-white text-2xl font-bold bg-gradient-to-r from-primary-400 to-accent-400 bg-clip-text text-transparent">{{ user.username }}</span>
-                            <span class="text-primary-300 text-sm">مرحبًا بك</span>
-                        </div>
-                        
-                        <!-- روابط المستخدم -->
-                        <a href="{% url 'core:dashboard' %}" class="mobile-nav-link animate-slide-in-right" style="animation-delay: 0.1s;">
-                            <i class="fas fa-chart-line ml-3"></i>لوحة التحكم
-                        </a>
-                        <a href="{% url 'messaging:inbox' %}" class="mobile-nav-link animate-slide-in-right" style="animation-delay: 0.2s;">
-                            <i class="fas fa-comments ml-3"></i>الرسائل
-                        </a>
-                        <a href="{% url 'test_list' %}" class="mobile-nav-link animate-slide-in-right" style="animation-delay: 0.3s;">
-                            <i class="fas fa-clipboard-list ml-3"></i>الاختبارات
-                        </a>
-                        <a href="{% url 'core:profile' %}" class="mobile-nav-link animate-slide-in-right" style="animation-delay: 0.4s;">
-                            <i class="fas fa-user-circle ml-3"></i>الملف الشخصي
-                        </a>
-                        <a href="{% url 'core:account_settings' %}" class="mobile-nav-link animate-slide-in-right" style="animation-delay: 0.5s;">
-                            <i class="fas fa-cog ml-3"></i>الإعدادات
-                        </a>
-                        
-                        <div class="my-6">
-                            <form action="{% url 'logout' %}" method="post">
-                                {% csrf_token %}
-                                <button type="submit" class="mobile-nav-link-red animate-fade-in-up" style="animation-delay: 0.6s;">
-                                    <i class="fas fa-sign-out-alt ml-3"></i>تسجيل الخروج
-                                </button>
-                            </form>
-                        </div>
-                    {% else %}
-                        <!-- روابط الزوار -->
-                        <a href="{% url 'register_request' %}" class="mobile-nav-link-blue animate-fade-in-up" style="animation-delay: 0.1s;">
-                            <i class="fas fa-user-plus ml-3"></i>سجل الآن
-                        </a>
-                        <a href="{% url 'login' %}" class="mobile-nav-link-green animate-fade-in-up" style="animation-delay: 0.2s;">
-                            <i class="fas fa-sign-in-alt ml-3"></i>تسجيل الدخول
-                        </a>
-                    {% endif %}
-                    
-                    <!-- فاصل مع تأثير -->
-                    <div class="flex items-center justify-center my-8">
-                        <div class="h-px bg-gradient-to-r from-transparent via-white/30 to-transparent w-full"></div>
-                        <div class="px-4">
-                            <i class="fas fa-star text-primary-400 animate-pulse"></i>
-                        </div>
-                        <div class="h-px bg-gradient-to-r from-transparent via-white/30 to-transparent w-full"></div>
+        {# قائمة الجوال (خارج الشاشة) #}
+        <div id="mobile-menu" class="fixed inset-0 bg-gray-800 bg-opacity-95 z-40 hidden md:hidden flex flex-col items-center justify-center transform translate-x-full transition-transform duration-300 ease-in-out">
+            <button id="close-mobile-menu-button" class="absolute top-4 left-4 text-white hover:text-gray-300 focus:outline-none">
+                <i class="fas fa-times text-3xl"></i>
+            </button>
+            <div class="flex flex-col space-y-6 text-center">
+                {# روابط المستخدم المسجل دخول (في قائمة الجوال) #}
+                {% if user.is_authenticated %}
+                    <div class="flex flex-col items-center mb-6">
+                        {% if user.profile_picture %}
+                            <img src="{{ user.profile_picture.url }}" alt="صورة الملف الشخصي" class="w-20 h-20 rounded-full object-cover border-4 border-blue-400 mb-3">
+                        {% else %}
+                            <img src="{% static 'images/default_profile.png' %}" alt="صورة افتراضية" class="w-20 h-20 rounded-full object-cover border-4 border-blue-400 mb-3">
+                        {% endif %}
+                        <span class="text-white text-xl font-semibold">{{ user.username }}</span>
                     </div>
-                    
-                    <!-- الروابط العامة -->
-                    <a href="{% url 'core:index' %}" class="mobile-nav-link animate-slide-in-right" style="animation-delay: 0.3s;">
-                        <i class="fas fa-home ml-3"></i>الرئيسية
-                    </a>
-                    <a href="{% url 'core:about_platform' %}" class="mobile-nav-link animate-slide-in-right" style="animation-delay: 0.4s;">
-                        <i class="fas fa-info-circle ml-3"></i>عن المنصة
-                    </a>
-                    <a href="{% url 'contacts:contact' %}" class="mobile-nav-link animate-slide-in-right" style="animation-delay: 0.5s;">
-                        <i class="fas fa-envelope ml-3"></i>تواصل معنا
-                    </a>
-                </div>
+                    {% if user.role == 'student' %}
+                        <a href="{% url 'core:dashboard' %}" class="mobile-nav-link">لوحة تحكم الطالب</a>
+                        <a href="{% url 'messaging:inbox' %}" class="mobile-nav-link">الرسائل</a>
+                        <a href="{% url 'academic:test_list' %}" class="mobile-nav-link">الاختبارات</a>
+                    {% elif user.role == 'teacher' %}
+                        <a href="{% url 'core:teacher_dashboard' %}" class="mobile-nav-link">لوحة تحكم المعلم</a>
+                        <a href="{% url 'messaging:inbox' %}" class="mobile-nav-link">الرسائل</a>
+                        {# يمكن إضافة روابط أخرى خاصة بالمعلم هنا في قائمة الجوال #}
+                    {% endif %}
+                    <a href="{% url 'core:profile' %}" class="mobile-nav-link">الملف الشخصي</a>
+                    <a href="{% url 'core:account_settings' %}" class="mobile-nav-link">الإعدادات</a>
+                    <a href="{% url 'logout' %}" class="mobile-nav-link-red">تسجيل الخروج</a>
+                {% else %}
+                    {# روابط الزوار (غير مسجلين دخول) في قائمة الجوال #}
+                    <a href="{% url 'register_request' %}" class="mobile-nav-link-blue">سجل الآن</a>
+                    <a href="{% url 'login' %}" class="mobile-nav-link-green">تسجيل الدخول</a>
+                {% endif %}
+                <div class="border-t border-gray-700 w-1/2 mx-auto my-6"></div> {# فاصل #}
+                <a href="{% url 'core:index' %}" class="mobile-nav-link">الرئيسية</a>
+                <a href="{% url 'core:about_platform' %}" class="mobile-nav-link">عن المنصة</a>
+                <a href="{% url 'contacts:contact' %}" class="mobile-nav-link">تواصل معنا</a>
             </div>
         </div>
 
-        <!-- منطقة المحتوى الرئيسية -->
-        <main class="flex-grow container mx-auto p-4 md:p-8 animate-fade-in-up">
-            <!-- رسائل النظام المحسنة -->
+        {# منطقة المحتوى الرئيسية #}
+        <main class="flex-grow container mx-auto p-4 md:p-8"> {# هوامش أكبر على الشاشات الكبيرة #}
+            {# منطقة عرض رسائل Django (مثل النجاح أو الخطأ) #}
             {% if messages %}
-                <div class="my-8 space-y-4">
+                <div class="my-6 space-y-3"> {# مسافات أكبر بين الرسائل #}
                     {% for message in messages %}
-                        <div class="message-container animate-fade-in-down flex items-center text-right
-                            {% if message.tags == 'success' %}message-success{% endif %}
-                            {% if message.tags == 'error' %}message-error{% endif %}
-                            {% if message.tags == 'warning' %}bg-gradient-to-r from-amber-50 to-yellow-50 text-amber-800 border-amber-500 shadow-amber-100{% endif %}
-                            {% if message.tags == 'info' %}bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-800 border-blue-500 shadow-blue-100{% endif %}" 
-                            role="alert">
-                            <div class="flex-shrink-0 ml-4">
-                                <i class="
-                                    {% if message.tags == 'success' %}fas fa-check-circle text-emerald-600 animate-bounce{% endif %}
-                                    {% if message.tags == 'error' %}fas fa-exclamation-circle text-red-600 animate-pulse{% endif %}
-                                    {% if message.tags == 'warning' %}fas fa-exclamation-triangle text-amber-600 animate-bounce{% endif %}
-                                    {% if message.tags == 'info' %}fas fa-info-circle text-blue-600 animate-pulse{% endif %}
-                                text-2xl"></i>
-                            </div>
-                            <div class="flex-grow">
-                                <span class="font-semibold text-lg block">{{ message }}</span>
-                            </div>
+                        <div class="p-4 rounded-lg border-r-4 animate-fade-in flex items-center text-right
+                            {% if message.tags == 'success' %}bg-green-100 text-green-800 border-green-500{% endif %}
+                            {% if message.tags == 'error' %}bg-red-100 text-red-800 border-red-500{% endif %}
+                            {% if message.tags == 'warning' %}bg-yellow-100 text-yellow-800 border-yellow-500{% endif %}
+                            {% if message.tags == 'info' %}bg-blue-100 text-blue-800 border-blue-500{% endif %}" role="alert">
+                            <i class="
+                                {% if message.tags == 'success' %}fas fa-check-circle text-green-600{% endif %}
+                                {% if message.tags == 'error' %}fas fa-exclamation-circle text-red-600{% endif %}
+                                {% if message.tags == 'warning' %}fas fa-exclamation-triangle text-yellow-600{% endif %}
+                                {% if message.tags == 'info' %}fas fa-info-circle text-blue-600{% endif %}
+                            ml-3 text-xl"></i>
+                            <span class="font-medium text-base">{{ message }}</span>
                         </div>
                     {% endfor %}
                 </div>
             {% endif %}
 
-            <!-- محتوى الصفحة -->
-            <div class="scroll-reveal">
-                {% block content %}
-                    <!-- المحتوى الخاص بالصفحة سيأتي هنا -->
-                {% endblock %}
-            </div>
+            {% block content %}
+                {# المحتوى الخاص بالصفحة سيأتي هنا #}
+            {% endblock %}
         </main>
 
-        <!-- تذييل الصفحة المحسن -->
-        <footer class="footer-gradient text-white p-8 md:p-16 mt-20 relative overflow-hidden">
-            <!-- تأثيرات الخلفية -->
-            <div class="absolute inset-0 bg-gradient-to-br from-primary-900/20 to-accent-900/20 animate-gradient-shift opacity-30"></div>
-            <div class="absolute top-0 right-0 w-64 h-64 bg-primary-500/10 rounded-full blur-3xl animate-pulse"></div>
-            <div class="absolute bottom-0 left-0 w-48 h-48 bg-accent-500/10 rounded-full blur-3xl animate-pulse" style="animation-delay: 1s;"></div>
-            
-            <div class="container mx-auto relative z-10">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-12 text-center md:text-right">
-                    
-                    <!-- القسم 1: روابط سريعة -->
-                    <div class="animate-fade-in-up" style="animation-delay: 0.1s;">
-                        <h3 class="text-2xl font-bold mb-8 text-primary-300 flex items-center justify-center md:justify-end">
-                            <i class="fas fa-link ml-3 animate-bounce-gentle"></i>
-                            روابط سريعة
-                        </h3>
-                        <ul class="space-y-4 text-slate-300 text-lg">
-                            <li>
-                                <a href="{% url 'core:index' %}" class="hover:text-primary-300 transition-all duration-300 flex items-center justify-center md:justify-end hover:translate-x-2 group">
-                                    <i class="fas fa-home ml-2 group-hover:animate-bounce"></i>
-                                    الرئيسية
-                                </a>
-                            </li>
-                            <li>
-                                <a href="{% url 'core:about_platform' %}" class="hover:text-primary-300 transition-all duration-300 flex items-center justify-center md:justify-end hover:translate-x-2 group">
-                                    <i class="fas fa-info-circle ml-2 group-hover:animate-bounce"></i>
-                                    عن المنصة
-                                </a>
-                            </li>
-                            <li>
-                                <a href="{% url 'contacts:contact' %}" class="hover:text-primary-300 transition-all duration-300 flex items-center justify-center md:justify-end hover:translate-x-2 group">
-                                    <i class="fas fa-envelope ml-2 group-hover:animate-bounce"></i>
-                                    تواصل معنا
-                                </a>
-                            </li>
-                            {% if user.is_authenticated %}
-                                <li>
-                                    <a href="{% url 'core:dashboard' %}" class="hover:text-primary-300 transition-all duration-300 flex items-center justify-center md:justify-end hover:translate-x-2 group">
-                                        <i class="fas fa-chart-line ml-2 group-hover:animate-bounce"></i>
-                                        لوحة التحكم
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="{% url 'test_list' %}" class="hover:text-primary-300 transition-all duration-300 flex items-center justify-center md:justify-end hover:translate-x-2 group">
-                                        <i class="fas fa-clipboard-list ml-2 group-hover:animate-bounce"></i>
-                                        الاختبارات
-                                    </a>
-                                </li>
+        {# تذييل الصفحة #}
+        <footer class="bg-gray-900 text-white p-8 md:p-12 mt-16"> {# خلفية أغمق وهوامش أكبر #}
+            <div class="container mx-auto grid grid-cols-1 md:grid-cols-3 gap-12 text-center md:text-right">
+                
+                {# القسم 1: روابط سريعة #}
+                <div>
+                    <h3 class="text-2xl font-semibold mb-6 text-blue-400">روابط سريعة</h3>
+                    <ul class="space-y-3 text-gray-300 text-lg">
+                        <li><a href="{% url 'core:index' %}" class="hover:text-blue-300 transition duration-300">الرئيسية</a></li>
+                        <li><a href="{% url 'core:about_platform' %}" class="hover:text-blue-300 transition duration-300">عن المنصة</a></li>
+                        <li><a href="{% url 'contacts:contact' %}" class="hover:text-blue-300 transition duration-300">تواصل معنا</a></li>
+                        {% if user.is_authenticated %}
+                            {% if user.role == 'student' %}
+                                <li><a href="{% url 'core:dashboard' %}" class="hover:text-blue-300 transition duration-300">لوحة تحكم الطالب</a></li>
+                                <li><a href="{% url 'academic:test_list' %}" class="hover:text-blue-300 transition duration-300">الاختبارات</a></li>
+                            {% elif user.role == 'teacher' %}
+                                <li><a href="{% url 'core:teacher_dashboard' %}" class="hover:text-blue-300 transition duration-300">لوحة تحكم المعلم</a></li>
                             {% endif %}
-                        </ul>
-                    </div>
-
-                    <!-- القسم 2: معلومات الاتصال -->
-                    <div class="animate-fade-in-up" style="animation-delay: 0.2s;">
-                        <h3 class="text-2xl font-bold mb-8 text-primary-300 flex items-center justify-center md:justify-end">
-                            <i class="fas fa-phone ml-3 animate-bounce-gentle"></i>
-                            اتصل بنا
-                        </h3>
-                        <ul class="space-y-4 text-slate-300 text-lg">
-                            <li>
-                                <a href="mailto:dhadedu4@gmail.com" class="hover:text-primary-300 transition-all duration-300 flex items-center justify-center md:justify-end hover:translate-x-2 group">
-                                    <div class="bg-gradient-to-r from-primary-500 to-primary-600 p-2 rounded-lg ml-3 group-hover:scale-110 transition-transform duration-300">
-                                        <i class="fas fa-envelope text-white"></i>
-                                    </div>
-                                    <span>dhadedu4@gmail.com</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="https://wa.me/+905317386627" target="_blank" rel="noopener noreferrer" class="hover:text-primary-300 transition-all duration-300 flex items-center justify-center md:justify-end hover:translate-x-2 group">
-                                    <div class="bg-gradient-to-r from-green-500 to-green-600 p-2 rounded-lg ml-3 group-hover:scale-110 transition-transform duration-300">
-                                        <i class="fab fa-whatsapp text-white"></i>
-                                    </div>
-                                    <span>+905317386627</span>
-                                </a>
-                            </li>
-                            <li class="flex items-center justify-center md:justify-end text-slate-400">
-                                <div class="bg-gradient-to-r from-slate-600 to-slate-700 p-2 rounded-lg ml-3">
-                                    <i class="fas fa-clock text-white"></i>
-                                </div>
-                                <span>متاح 24/7</span>
-                            </li>
-                        </ul>
-                    </div>
-
-                    <!-- القسم 3: تابعنا -->
-                    <div class="animate-fade-in-up" style="animation-delay: 0.3s;">
-                        <h3 class="text-2xl font-bold mb-8 text-primary-300 flex items-center justify-center md:justify-end">
-                            <i class="fas fa-share-alt ml-3 animate-bounce-gentle"></i>
-                            تابعنا
-                        </h3>
-                        <div class="flex justify-center md:justify-end space-x-6 mb-6">
-                            <a href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer" class="group">
-                                <div class="bg-gradient-to-br from-pink-500 to-orange-500 p-4 rounded-xl text-white transition-all duration-300 hover:scale-110 hover:rotate-6 shadow-lg hover:shadow-xl">
-                                    <i class="fab fa-instagram text-2xl group-hover:animate-pulse"></i>
-                                </div>
-                            </a>
-                            <a href="https://twitter.com/" target="_blank" rel="noopener noreferrer" class="group">
-                                <div class="bg-gradient-to-br from-blue-400 to-blue-600 p-4 rounded-xl text-white transition-all duration-300 hover:scale-110 hover:rotate-6 shadow-lg hover:shadow-xl">
-                                    <i class="fab fa-twitter text-2xl group-hover:animate-pulse"></i>
-                                </div>
-                            </a>
-                            <a href="https://www.facebook.com/" target="_blank" rel="noopener noreferrer" class="group">
-                                <div class="bg-gradient-to-br from-blue-600 to-blue-800 p-4 rounded-xl text-white transition-all duration-300 hover:scale-110 hover:rotate-6 shadow-lg hover:shadow-xl">
-                                    <i class="fab fa-facebook-f text-2xl group-hover:animate-pulse"></i>
-                                </div>
-                            </a>
-                        </div>
-                        
-                        <!-- إضافة معلومات إضافية -->
-                        <div class="text-center md:text-right">
-                            <p class="text-slate-400 text-sm mb-2">انضم إلى مجتمعنا التعليمي</p>
-                            <div class="flex items-center justify-center md:justify-end text-slate-300">
-                                <span class="bg-gradient-to-r from-accent-500 to-accent-600 px-3 py-1 rounded-full text-sm font-semibold text-white ml-2">
-                                    +1000 طالب
-                                </span>
-                                <i class="fas fa-users"></i>
-                            </div>
-                        </div>
-                    </div>
+                        {% endif %}
+                    </ul>
                 </div>
 
-                <!-- خط فاصل مع تأثير -->
-                <div class="flex items-center justify-center mt-16 mb-8">
-                    <div class="h-px bg-gradient-to-r from-transparent via-slate-400 to-transparent w-full"></div>
-                    <div class="px-6">
-                        <i class="fas fa-graduation-cap text-primary-400 text-2xl animate-bounce-gentle"></i>
-                    </div>
-                    <div class="h-px bg-gradient-to-r from-transparent via-slate-400 to-transparent w-full"></div>
+                {# القسم 2: معلومات الاتصال #}
+                <div>
+                    <h3 class="text-2xl font-semibold mb-6 text-blue-400">اتصل بنا</h3>
+                    <ul class="space-y-3 text-gray-300 text-lg">
+                        <li class="flex items-center justify-center md:justify-end">
+                            <a href="mailto:h55180d@gmail.com" class="hover:text-blue-300 transition duration-300 flex items-center justify-center md:justify-end">
+                                <i class="fas fa-envelope text-blue-300 ml-3"></i> 
+                                <span>h55180d@gmail.com</span>
+                            </a>
+                        </li>
+                        <li class="flex items-center justify-center md:justify-end">
+                            <a href="https://wa.me/966501234567" target="_blank" rel="noopener noreferrer" class="hover:text-blue-300 transition duration-300 flex items-center justify-center md:justify-end">
+                                <i class="fab fa-whatsapp text-green-500 ml-3"></i> 
+                                <span>+966 50 123 4567</span> 
+                            </a>
+                        </li>
+                    </ul>
                 </div>
 
-                <!-- حقوق النشر المحسنة -->
-                <div class="text-center text-slate-400 animate-fade-in" style="animation-delay: 0.4s;">
-                    <div class="mb-4">
-                        <p class="text-lg font-semibold mb-2">منصة ضاد التعليمية</p>
-                        <p class="text-sm">نحو مستقبل تعليمي أفضل</p>
-                    </div>
-                    <div class="flex items-center justify-center space-x-4 text-xs">
-                        <span>&copy; 2025 جميع الحقوق محفوظة</span>
-                        <span class="w-1 h-1 bg-slate-400 rounded-full"></span>
-                        <a href="https://wa.me/+963949399738" target="_blank" rel="noopener noreferrer" class="hover:text-primary-300 transition-all duration-300 flex items-center justify-center md:justify-end hover:translate-x-2 group">
-                        <span>تم التطوير من قبل <i class="fas fa-heart text-red-500 animate-pulse"></i>Pro.Hamid Almurai</span>
+                {# القسم 3: تابعنا #}
+                <div>
+                    <h3 class="text-2xl font-semibold mb-6 text-blue-400">تابعنا</h3>
+                    <div class="flex justify-center md:justify-end space-x-6"> 
+                        <a href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer" class="text-gray-300 hover:text-blue-300 transition duration-300">
+                            <i class="fab fa-instagram text-4xl"></i> 
+                        </a>
+                        <a href="https://twitter.com/" target="_blank" rel="noopener noreferrer" class="text-gray-300 hover:text-blue-300 transition duration-300">
+                            <i class="fab fa-twitter text-4xl"></i> 
+                        </a>
+                        <a href="https://www.facebook.com/" target="_blank" rel="noopener noreferrer" class="text-gray-300 hover:text-blue-300 transition duration-300">
+                            <i class="fab fa-facebook-f text-4xl"></i> 
                         </a>
                     </div>
                 </div>
             </div>
+
+            {# حقوق النشر #}
+            <div class="border-t border-gray-700 mt-10 pt-8 text-center text-gray-400 font-light text-sm">
+                &copy; 2025 منصة ضاد التعليمية. جميع الحقوق محفوظة.
+            </div>
         </footer>
     </div>
 
-    <!-- JavaScript محسن -->
+    {# JavaScript مخصص لتشغيل قائمة الجوال #}
     {% block extra_js %}
     <script>
-        // وظائف القائمة المحسنة
         const mobileMenuButton = document.getElementById('mobile-menu-button');
         const closeMobileMenuButton = document.getElementById('close-mobile-menu-button');
         const mobileMenu = document.getElementById('mobile-menu');
 
-        // فتح القائمة مع تأثيرات محسنة
         mobileMenuButton.addEventListener('click', () => {
             mobileMenu.classList.remove('hidden');
-            document.body.style.overflow = 'hidden'; // منع التمرير
             setTimeout(() => {
                 mobileMenu.classList.remove('translate-x-full');
-            }, 10);
+            }, 10); /* مهلة قصيرة للسماح لـ 'hidden' بالاختفاء أولاً */
         });
 
-        // إغلاق القائمة مع تأثيرات محسنة
-        function closeMobileMenu() {
+        closeMobileMenuButton.addEventListener('click', () => {
             mobileMenu.classList.add('translate-x-full');
-            document.body.style.overflow = 'auto'; // استعادة التمرير
             setTimeout(() => {
                 mobileMenu.classList.add('hidden');
-            }, 500);
-        }
+            }, 300); /* تطابق مدة الانتقال */
+        });
 
-        closeMobileMenuButton.addEventListener('click', closeMobileMenu);
-
-        // إغلاق عند النقر خارج القائمة
+        // إغلاق القائمة عند النقر خارجها (للتجربة المكتبية، غير ضروري للجوال عادةً)
         mobileMenu.addEventListener('click', (event) => {
             if (event.target === mobileMenu) {
-                closeMobileMenu();
+                mobileMenu.classList.add('translate-x-full');
+                setTimeout(() => {
+                    mobileMenu.classList.add('hidden');
+                }, 300);
             }
         });
 
-        // إغلاق عند تغيير حجم الشاشة
+        // عند تغيير حجم الشاشة من صغير إلى كبير، يتم إخفاء قائمة الجوال تلقائياً
         window.addEventListener('resize', () => {
-            if (window.innerWidth >= 768) {
+            if (window.innerWidth >= 768) { // 768px هو breakpoint لـ 'md' في Tailwind
                 mobileMenu.classList.add('hidden');
                 mobileMenu.classList.add('translate-x-full');
-                document.body.style.overflow = 'auto';
             }
         });
-
-        // تأثير التمرير المتقدم
-        const observerOptions = {
-            threshold: 0.1,
-            rootMargin: '0px 0px -50px 0px'
-        };
-
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('revealed');
-                }
-            });
-        }, observerOptions);
-
-        // مراقبة العناصر القابلة للكشف
-        document.querySelectorAll('.scroll-reveal').forEach(el => {
-            observer.observe(el);
-        });
-
-        // تأثير النقر على الأزرار
-        document.querySelectorAll('.btn-primary, .btn-secondary').forEach(button => {
-            button.addEventListener('click', function(e) {
-                let ripple = document.createElement('span');
-                let rect = this.getBoundingClientRect();
-                let size = Math.max(rect.width, rect.height);
-                let x = e.clientX - rect.left - size / 2;
-                let y = e.clientY - rect.top - size / 2;
-                
-                ripple.style.width = ripple.style.height = size + 'px';
-                ripple.style.left = x + 'px';
-                ripple.style.top = y + 'px';
-                ripple.classList.add('ripple');
-                
-                this.appendChild(ripple);
-                
-                setTimeout(() => {
-                    ripple.remove();
-                }, 600);
-            });
-        });
-
-        // تحسين الأداء - تحميل الخطوط بشكل تدريجي
-        if ('fonts' in document) {
-            document.fonts.ready.then(() => {
-                document.body.classList.add('fonts-loaded');
-            });
-        }
-
-        // تأثير التمرير الناعم للروابط الداخلية
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    target.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start'
-                    });
-                }
-            });
-        });
-
-        // تحسين الصور - تحميل تدريجي
-        const imageObserver = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    const img = entry.target;
-                    if (img.dataset.src) {
-                        img.src = img.dataset.src;
-                        img.classList.add('loaded');
-                        imageObserver.unobserve(img);
-                    }
-                }
-            });
-        });
-
-        document.querySelectorAll('img[data-src]').forEach(img => {
-            imageObserver.observe(img);
-        });
-
-        // تتبع النشاط للتحليلات (اختياري)
-        let isActive = true;
-        let activityTimer;
-
-        function resetActivityTimer() {
-            clearTimeout(activityTimer);
-            isActive = true;
-            activityTimer = setTimeout(() => {
-                isActive = false;
-            }, 300000); // 5 دقائق
-        }
-
-        ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart'].forEach(event => {
-            document.addEventListener(event, resetActivityTimer, true);
-        });
-
-        // تحسين الأداء - تأخير تحميل المحتوى غير المهم
-        document.addEventListener('DOMContentLoaded', () => {
-            setTimeout(() => {
-                // تحميل المكونات الثانوية
-                const deferredElements = document.querySelectorAll('[data-defer]');
-                deferredElements.forEach(el => {
-                    el.style.visibility = 'visible';
-                });
-            }, 1000);
-        });
-
-        // إضافة CSS للتأثيرات الديناميكية
-        const style = document.createElement('style');
-        style.textContent = `
-            .ripple {
-                position: absolute;
-                border-radius: 50%;
-                background: rgba(255, 255, 255, 0.6);
-                transform: scale(0);
-                animation: ripple-animation 0.6s linear;
-                pointer-events: none;
-            }
-            
-            @keyframes ripple-animation {
-                to {
-                    transform: scale(4);
-                    opacity: 0;
-                }
-            }
-            
-            .fonts-loaded {
-                font-display: swap;
-            }
-            
-            img.loaded {
-                opacity: 1;
-                transition: opacity 0.3s ease;
-            }
-            
-            img[data-src] {
-                opacity: 0;
-            }
-        `;
-        document.head.appendChild(style);
     </script>
     {% endblock %}
 </body>

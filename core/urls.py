@@ -27,4 +27,5 @@ urlpatterns = [
     # إضافة مسار URL الجديد لصفحة تفاصيل التقدم
     # --------------------------------------------------------------------------
     path('progress/', views.progress_detail, name='progress_detail'), # NEW URL
+    path('teacher/', views.teacher_dashboard, name='teacher_dashboard'),
 ]

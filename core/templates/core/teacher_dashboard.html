@@ -1,0 +1,139 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_head %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        .card {
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            cursor: pointer;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 25px -5px rgba(0, 0, 0, 0.1), 0 5px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8 max-w-7xl">
+    <nav class="text-gray-700 text-sm mb-6" aria-label="breadcrumb">
+        <ol class="list-none p-0 inline-flex">
+            <li class="flex items-center">
+                <a href="{% url 'core:index' %}" class="text-blue-600 hover:text-blue-800">الرئيسية</a>
+                <span class="mx-2">/</span>
+            </li>
+            <li class="flex items-center">
+                <span class="text-gray-500">لوحة تحكم المعلم</span>
+            </li>
+        </ol>
+    </nav>
+
+    <div class="bg-white shadow-xl rounded-lg p-6 mb-8">
+        <h1 class="text-4xl font-extrabold text-gray-900 mb-4">مرحباً بك، {{ user.get_full_name|default:user.username }}!</h1>
+        <p class="text-gray-700 text-lg">هذه لوحة تحكم المعلم الخاصة بك، حيث يمكنك إدارة الدورات، الواجبات، والدروس.</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {# بطاقة الدورات #}
+        <a href="#" class="card bg-gradient-to-br from-blue-500 to-blue-700 text-white p-6 rounded-lg shadow-md flex items-center justify-between">
+            <div>
+                <h2 class="text-2xl font-bold mb-2">دوراتي</h2>
+                <p class="text-lg">{{ teacher_courses.count }} دورة</p>
+            </div>
+            <i class="fas fa-book-open text-4xl opacity-75"></i>
+        </a>
+
+        {# بطاقة الحلقات #}
+        <a href="#" class="card bg-gradient-to-br from-green-500 to-green-700 text-white p-6 rounded-lg shadow-md flex items-center justify-between">
+            <div>
+                <h2 class="text-2xl font-bold mb-2">حلقاتي الدراسية</h2>
+                <p class="text-lg">{{ teacher_classes.count }} حلقة</p>
+            </div>
+            <i class="fas fa-users text-4xl opacity-75"></i>
+        </a>
+
+        {# بطاقة الواجبات المعلقة #}
+        <a href="#" class="card bg-gradient-to-br from-yellow-500 to-yellow-700 text-white p-6 rounded-lg shadow-md flex items-center justify-between">
+            <div>
+                <h2 class="text-2xl font-bold mb-2">واجبات بانتظار التصحيح</h2>
+                <p class="text-lg">{{ pending_submissions }} تسليم</p>
+            </div>
+            <i class="fas fa-clipboard-check text-4xl opacity-75"></i>
+        </a>
+
+        {# بطاقة إدارة الدروس #}
+        <a href="#" class="card bg-gradient-to-br from-purple-500 to-purple-700 text-white p-6 rounded-lg shadow-md flex items-center justify-between">
+            <div>
+                <h2 class="text-2xl font-bold mb-2">إدارة الدروس</h2>
+                <p class="text-lg">إضافة / تعديل دروس</p>
+            </div>
+            <i class="fas fa-video text-4xl opacity-75"></i>
+        </a>
+
+        {# بطاقة إدارة الملفات #}
+        <a href="#" class="card bg-gradient-to-br from-red-500 to-red-700 text-white p-6 rounded-lg shadow-md flex items-center justify-between">
+            <div>
+                <h2 class="text-2xl font-bold mb-2">إدارة الملفات</h2>
+                <p class="text-lg">إضافة / تعديل ملفات</p>
+            </div>
+            <i class="fas fa-file-upload text-4xl opacity-75"></i>
+        </a>
+
+        {# بطاقة الاختبارات #}
+        <a href="#" class="card bg-gradient-to-br from-teal-500 to-teal-700 text-white p-6 rounded-lg shadow-md flex items-center justify-between">
+            <div>
+                <h2 class="text-2xl font-bold mb-2">الاختبارات</h2>
+                <p class="text-lg">إدارة / نتائج</p>
+            </div>
+            <i class="fas fa-tasks text-4xl opacity-75"></i>
+        </a>
+    </div>
+
+    {# قسم لعرض الدورات التي يدرسها المعلم بشكل مفصل (أو أي معلومات أخرى) #}
+    <div class="bg-white shadow-xl rounded-lg p-6 mt-8">
+        <h3 class="text-2xl font-bold text-gray-800 mb-6">دوراتي المسندة</h3>
+        {% if teacher_courses %}
+            <div class="overflow-x-auto">
+                <table class="min-w-full bg-white">
+                    <thead>
+                        <tr class="w-full bg-gray-200 text-gray-600 uppercase text-sm leading-normal">
+                            <th class="py-3 px-6 text-left">اسم الدورة</th>
+                            <th class="py-3 px-6 text-left">الوصف</th>
+                            <th class="py-3 px-6 text-center">عدد الحلقات</th>
+                            <th class="py-3 px-6 text-center">الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-gray-600 text-sm font-light">
+                        {% for course in teacher_courses %}
+                        <tr class="border-b border-gray-200 hover:bg-gray-100">
+                            <td class="py-3 px-6 text-left whitespace-nowrap">
+                                <a href="{% url 'academic:course_detail' course_id=course.id %}" class="text-blue-600 hover:text-blue-800 font-semibold">{{ course.name }}</a>
+                            </td>
+                            <td class="py-3 px-6 text-left">{{ course.description|truncatechars:70 }}</td>
+                            <td class="py-3 px-6 text-center">{{ course.classes.count }}</td>
+                            <td class="py-3 px-6 text-center">
+                                <div class="flex item-center justify-center">
+                                    <a href="#" class="w-4 mr-2 transform hover:text-purple-500 hover:scale-110" title="إدارة الواجبات">
+                                        <i class="fas fa-tasks"></i>
+                                    </a>
+                                    <a href="#" class="w-4 mr-2 transform hover:text-blue-500 hover:scale-110" title="إدارة الدروس">
+                                        <i class="fas fa-video"></i>
+                                    </a>
+                                    <a href="#" class="w-4 mr-2 transform hover:text-green-500 hover:scale-110" title="إدارة الملفات">
+                                        <i class="fas fa-file-alt"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="text-gray-600 text-lg text-center p-8">لم يتم تعيينك كمعلم لأي دورات بعد.</p>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}
