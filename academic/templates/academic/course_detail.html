@@ -260,7 +260,7 @@
                     <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                         {% for classmate in classmates %}
                             <div class="bg-gray-50 p-4 rounded-lg shadow-sm flex items-center transition duration-300 ease-in-out transform hover:scale-103">
-                                {% comment %} علقت الصورة لانه ممكن بنت تحط صورتها الحقيقية {% endcomment %}
+                                {% comment %} علقت الصورة لانه ممكن بنت تحط صورتها الحقيقية و هي كمان فيها خطأ {% endcomment %}
                                 {% comment %} <img src="{{ classmate.profile_picture.url|default:'/static/images/default_profile.png' }}" alt="{{ classmate.get_full_name }}" class="w-12 h-12 rounded-full object-cover mr-4"> {% endcomment %}
                                 <div>
                                     <p class="font-semibold text-gray-800">{{ classmate.get_full_name }}</p>

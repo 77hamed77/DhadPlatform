@@ -41,7 +41,7 @@
             </ul>
         {% endif %}
 
-        <form method="post" action="{% url 'submit_test' test_result.id %}" id="test-form" class="space-y-8"> {# أضف id للوصول من JS #}
+        <form method="post" action="{% url 'academic:submit_test' test_result.id %}" id="test-form" class="space-y-8"> {# أضف id للوصول من JS #}
             {% csrf_token %}
 
             {% for question in questions %}

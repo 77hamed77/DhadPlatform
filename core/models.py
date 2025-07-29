@@ -1,9 +1,10 @@
-# core/models.py
-
+# C:\projectsDejango\DhadPlatform\core\models.py
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.utils import timezone
 from django.apps import apps
+from django.db.models import Sum # Import Sum for potential future use or more optimized queries
+from django.db.models.functions import Coalesce # Import Coalesce for handling None values in database queries
 
 # --------------------------------------------------------------------------
 # نقل DEFINED_LEVEL_CHOICES إلى هنا لتجنب الاستيراد الدائري
@@ -84,11 +85,11 @@ class User(AbstractUser):
         يرجع قائمة بالبرامج الفريدة التي سجل فيها الطالب.
         """
         if self.role != 'student':
-            Program = apps.get_model('academic', 'Program') 
+            Program = apps.get_model('academic', 'Program')
             return Program.objects.none()
 
         Course = apps.get_model('academic', 'Course')
-        Program = apps.get_model('academic', 'Program') 
+        Program = apps.get_model('academic', 'Program')
 
         enrolled_courses = Course.objects.filter(classes__students=self).distinct()
         programs = Program.objects.filter(courses__in=enrolled_courses).distinct().order_by('name')
@@ -107,10 +108,10 @@ class User(AbstractUser):
         يرجع قائمة بالمواد (الكورسات) الفريدة التي سجل فيها الطالب.
         """
         if self.role != 'student':
-            Course = apps.get_model('academic', 'Course') 
+            Course = apps.get_model('academic', 'Course')
             return Course.objects.none()
-        
-        Course = apps.get_model('academic', 'Course') 
+
+        Course = apps.get_model('academic', 'Course')
         return Course.objects.filter(classes__students=self).distinct().order_by('name')
 
     # --------------------------------------------------------------------------
@@ -121,12 +122,12 @@ class User(AbstractUser):
         يرجع قائمة بالحلقات الدراسية (Classes) القادمة التي سجل فيها الطالب.
         """
         if self.role != 'student':
-            Class = apps.get_model('academic', 'Class') 
+            Class = apps.get_model('academic', 'Class')
             return Class.objects.none()
 
         now = timezone.now()
-        
-        Class = apps.get_model('academic', 'Class') 
+
+        Class = apps.get_model('academic', 'Class')
 
         upcoming_classes = Class.objects.filter(
             students=self,
@@ -143,12 +144,12 @@ class User(AbstractUser):
         """
         Calculates the overall progress percentage for the student.
         This method needs to be implemented based on your academic structure.
-        
+
         Example logic might include:
         1. Percentage of lessons completed within enrolled courses.
         2. Average score on tests taken.
         3. Completion of specific milestones/modules.
-        
+
         For now, this is a placeholder. You must replace it with your actual logic.
         """
         if self.role != 'student':
@@ -157,16 +158,16 @@ class User(AbstractUser):
         # Dynamically get models from the 'academic' app to avoid circular imports
         Course = apps.get_model('academic', 'Course')
         Lesson = apps.get_model('academic', 'Lesson')
-        LessonProgress = apps.get_model('academic', 'LessonProgress') 
-        Test = apps.get_model('academic', 'Test')
-        TestResult = apps.get_model('academic', 'TestResult') 
+        LessonProgress = apps.get_model('academic', 'LessonProgress')
+        Test = apps.get_model('academic', 'Test') # Assuming Test model exists
+        TestResult = apps.get_model('academic', 'TestResult')
 
         total_progress_points = 0
         achieved_progress_points = 0
-        
+
         # --- Example Progress Logic (You need to customize this heavily) ---
-        
-        # 1. Progress based on lessons completed
+
+        # 1. Progress based on lessons completed (Weight: 70%)
         enrolled_courses = self.get_enrolled_courses() # Reuse the existing method
         total_lessons_in_enrolled_courses = 0
         completed_lessons_count = 0
@@ -174,12 +175,12 @@ class User(AbstractUser):
         for course in enrolled_courses:
             total_lessons_in_course = Lesson.objects.filter(course=course).count()
             total_lessons_in_enrolled_courses += total_lessons_in_course
-            
+
             # Count lessons completed by this student in this course
             completed_lessons_count += LessonProgress.objects.filter(
                 student=self,
                 lesson__course=course,
-                status='completed' # <-- CHANGED THIS LINE: Use status='completed'
+                status='completed'
             ).count()
 
         if total_lessons_in_enrolled_courses > 0:
@@ -188,26 +189,28 @@ class User(AbstractUser):
             lesson_completion_percentage = 0
 
         # Assign weight to lesson completion (e.g., 70% of overall progress)
-        total_progress_points += 70 
+        total_progress_points += 70
         achieved_progress_points += (lesson_completion_percentage / 100) * 70
 
-        # 2. Progress based on test scores (example)
-        # Assuming tests are associated with courses or levels
+        # 2. Progress based on test scores (Weight: 30%)
         student_test_results = TestResult.objects.filter(student=self)
-        
+
         total_test_score_sum = 0
         max_possible_test_score_sum = 0
-        
+
         for result in student_test_results:
-            total_test_score_sum += result.score
+            # FIX: Handle case where result.score might be None
+            total_test_score_sum += (result.score if result.score is not None else 0)
+
             # Assuming your Test model has a 'max_score' field
-            if hasattr(result.test, 'max_score'):
+            if hasattr(result.test, 'max_score') and result.test.max_score is not None:
                 max_possible_test_score_sum += result.test.max_score
             else:
-                # Fallback if Test model doesn't have max_score,
-                # or define a default max score per test/question type
-                max_possible_test_score_sum += 100 # Example default
-        
+                # Fallback if Test model doesn't have max_score or it's None.
+                # You might want to get this from individual test questions' max scores
+                # or a default for each test. Adjust this logic based on your Test model.
+                max_possible_test_score_sum += 100 # Example default or a calculated value
+
         if max_possible_test_score_sum > 0:
             test_score_percentage = (total_test_score_sum / max_possible_test_score_sum) * 100
         else:
@@ -224,7 +227,7 @@ class User(AbstractUser):
             overall_percentage = 0
 
         return round(overall_percentage, 2)
-        
+
         # --- END Example Progress Logic ---
 
         # If you don't have detailed academic models yet, you can start with a simple placeholder:

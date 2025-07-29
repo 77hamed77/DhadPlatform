@@ -82,7 +82,7 @@
                             {# زر الإجراء أو النتيجة #}
                             <div class="flex-shrink-0"> {# لمنع تقلص زر الإجراء #}
                                 {% if status == 'not_started' or status == 'in_progress' %}
-                                    <a href="{% url 'start_test' test.id %}" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-5 rounded-md inline-flex items-center transition duration-300 ease-in-out transform hover:scale-105 shadow-md">
+                                    <a href="{% url 'academic:start_test' test.id %}" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-5 rounded-md inline-flex items-center transition duration-300 ease-in-out transform hover:scale-105 shadow-md">
                                         <i class="fas {% if status == 'in_progress' %}fa-play-circle{% else %}fa-play{% endif %} ml-2"></i>
                                         {% if status == 'in_progress' %}متابعة الاختبار{% else %}بدء الاختبار{% endif %}
                                     </a>

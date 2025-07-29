@@ -206,6 +206,7 @@
                     </div>
                     {% if user.role == 'student' %}
                         <a href="{% url 'core:dashboard' %}" class="mobile-nav-link">لوحة تحكم الطالب</a>
+                        
                         <a href="{% url 'messaging:inbox' %}" class="mobile-nav-link">الرسائل</a>
                         <a href="{% url 'academic:test_list' %}" class="mobile-nav-link">الاختبارات</a>
                     {% elif user.role == 'teacher' %}
