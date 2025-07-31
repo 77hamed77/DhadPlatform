@@ -18,6 +18,7 @@ urlpatterns = [
     
     path('contacts/', include('contacts.urls', namespace='contacts')), 
     
+    
     path('', include('messaging.urls')), 
     
     # لوحة التحكم الخاصة بالإدارة
